@@ -24,4 +24,5 @@ jobs:
       run: mvn -B package --file backend/pom.xml  # ✅ Updated path
 
     - name: Update dependency graph
-      uses: advanced-security/maven-dependency-submission-action@571e99aab1055c2e71a1e2309b
+      uses: advanced-security/maven-dependency-submission-action@v3
+
