@@ -1,27 +1,38 @@
 package com.net1707.backend.service;
 
+import com.net1707.backend.dto.LoginRequestDTO;
 import com.net1707.backend.dto.RegisterRequestDTO;
 import com.net1707.backend.dto.StaffRegisterDTO;
 import com.net1707.backend.model.Customer;
 import com.net1707.backend.model.Staff;
 import com.net1707.backend.repository.CustomerRepository;
 import com.net1707.backend.repository.StaffRepository;
+import com.net1707.backend.security.JwtUtil;
+import com.net1707.backend.service.Interface.IAuthService;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AuthService {
+public class AuthService implements IAuthService {
 
     private final CustomerRepository customerRepository;
     private final PasswordEncoder passwordEncoder;
     private final StaffRepository staffRepository;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtil jwtUtil;
 
-    public AuthService(CustomerRepository customerRepository, PasswordEncoder passwordEncoder, StaffRepository staffRepository) {
+    public AuthService(CustomerRepository customerRepository, PasswordEncoder passwordEncoder, StaffRepository staffRepository, AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
         this.customerRepository = customerRepository;
         this.passwordEncoder = passwordEncoder;
         this.staffRepository = staffRepository;
+        this.authenticationManager = authenticationManager;
+        this.jwtUtil = jwtUtil;
     }
 
+    @Override
     public String register(RegisterRequestDTO request) {
         if(customerRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new RuntimeException("Email already taken");
@@ -38,51 +49,39 @@ public class AuthService {
         return "Customer registered successfully!";
     }
 
+    @Override
     public String registerStaff(StaffRegisterDTO staffRegisterDTO) {
-        // Kiểm tra email Staff có tồn tại không
+        // Check email exist
         if (staffRepository.findByEmail(staffRegisterDTO.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Email is already taken");
         }
 
-        // Tạo đối tượng Staff mới với dữ liệu từ DTO
+        // Create Staff
         Staff staff = new Staff();
         staff.setFullname(staffRegisterDTO.getFullname());
         staff.setEmail(staffRegisterDTO.getEmail());
         staff.setPhone(staffRegisterDTO.getPhone());
-        staff.setRole(staffRegisterDTO.getRole()); // Dùng trực tiếp Enum Role
-        staff.setPassword(passwordEncoder.encode(staffRegisterDTO.getPassword())); // Mã hóa mật khẩu
+        staff.setRole(staffRegisterDTO.getRole()); // Use Role Enum
+        staff.setPassword(passwordEncoder.encode(staffRegisterDTO.getPassword())); // Encrypt Password
 
-        // Lưu Staff vào cơ sở dữ liệu
+        // Save Staff DB
         staffRepository.save(staff);
 
         return "Staff registered successfully";
     }
 
+    @Override
+    public String login(LoginRequestDTO loginRequestDTO){
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequestDTO.getEmail(), loginRequestDTO.getPassword()));
 
+            return jwtUtil.generateToken(loginRequestDTO.getEmail());
 
-
-//    private final UserRepository userRepository;
-//    private final PasswordEncoder passwordEncoder;
-//
-//    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-//        this.userRepository = userRepository;
-//        this.passwordEncoder = passwordEncoder;
-//    }
-//
-//    public String register(RegisterRequestDTO request) {
-//        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-//            throw new RuntimeException("Username already taken");
-//        }
-//
-//        // Mã hóa mật khẩu trước khi lưu vào DB
-//        User user = new User();
-//        user.setUsername(request.getUsername());
-//        user.setPassword(passwordEncoder.encode(request.getPassword()));
-//        user.setRole(request.getRole());
-//
-//        userRepository.save(user);
-//        return "User registered successfully!";
-//    }
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid email or password");
+        }
+    }
 
 
 }

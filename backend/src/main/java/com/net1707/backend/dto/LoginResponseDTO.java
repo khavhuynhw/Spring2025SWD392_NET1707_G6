@@ -5,11 +5,11 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class LoginReponseDTO {
+public class LoginResponseDTO {
 
     private String token;
 
-    public LoginReponseDTO(String token) {
+    public LoginResponseDTO(String token) {
         this.token = token;
     }
 
