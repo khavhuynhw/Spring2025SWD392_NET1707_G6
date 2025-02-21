@@ -15,7 +15,7 @@ public class Staff {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer staffId;
+    private Long staffId;
 
     private String fullname;
     private String email;

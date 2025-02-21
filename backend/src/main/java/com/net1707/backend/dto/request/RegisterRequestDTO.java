@@ -1,4 +1,4 @@
-package com.net1707.backend.dto;
+package com.net1707.backend.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

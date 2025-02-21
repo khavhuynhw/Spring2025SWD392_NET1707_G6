@@ -3,6 +3,7 @@ package com.net1707.backend.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -17,7 +18,7 @@ public class Payment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer paymentId;
+    private Long paymentId;
 
     @ManyToOne
     @JoinColumn(name = "orderId", nullable = false)
@@ -27,12 +28,17 @@ public class Payment {
     private String paymentMethod;
 
     @Column(nullable = false)
-    private Float amount;
+    private BigDecimal amount;
 
     @Column(nullable = false)
     private Date paymentDate;
 
-    @Column(nullable = false, length = 255)
-    private String paymentStatus;
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus paymentStatus;
 
+    public enum PaymentStatus{
+        ACCEPTED,
+        DENIED,
+        PENDING
+    }
 }

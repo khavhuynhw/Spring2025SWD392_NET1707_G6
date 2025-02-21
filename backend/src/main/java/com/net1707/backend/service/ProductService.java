@@ -34,26 +34,24 @@ public class ProductService implements IProductService{
     //update details product
     @Override
     @Transactional
-    public Product updateProduct(UpdateProductDTO productDTO) {
-        Product existingProduct = productRepository.findById(productDTO.getProductID())
-                .orElseThrow(() -> new RuntimeException("Product with ID "
-                        + productDTO.getProductID() + " not found"));
-
-        // update information
-        existingProduct.setProductName(productDTO.getProductName());
-        existingProduct.setDescription(productDTO.getDescription());
-        existingProduct.setPrice(productDTO.getPrice());
-        existingProduct.setCategory(productDTO.getCategory());
-        existingProduct.setSkinTypeCompatibility(productDTO.getSkinTypeCompatibility());
-
-        // save updateproduct
-        return productRepository.save(existingProduct);
-
+    public Product updateProduct(Long productId,Product updatedProduct) {
+        Optional<Product> existingProductOpt = productRepository.findById(productId);
+        if(existingProductOpt.isPresent()) {
+            Product existingProduct = existingProductOpt.get();
+            existingProduct.setProductName(updatedProduct.getProductName());
+            existingProduct.setDescription(updatedProduct.getDescription());
+            existingProduct.setPrice(updatedProduct.getPrice());
+            existingProduct.setCategory(updatedProduct.getCategory());
+            existingProduct.setSkinTypeCompatibility(updatedProduct.getSkinTypeCompatibility());
+            existingProduct.setStockQuantity(updatedProduct.getStockQuantity());
+            return productRepository.save(existingProduct);
+        } else {
+            throw new RuntimeException("Product not found with id: " + productId);
+        }
     }
 
     //delete product
-    @Override
-    public void deleteProduct(int productId) {
+    public void deleteProduct(Long productId) {
         productRepository.deleteById(productId);
     }
 

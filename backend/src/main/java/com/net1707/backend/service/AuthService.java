@@ -1,6 +1,5 @@
 package com.net1707.backend.service;
 
-import com.net1707.backend.dto.LoginRequestDTO;
 import com.net1707.backend.dto.RegisterRequestDTO;
 import com.net1707.backend.dto.StaffRegisterDTO;
 import com.net1707.backend.model.Customer;
