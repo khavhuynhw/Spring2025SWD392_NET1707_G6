@@ -23,21 +23,21 @@ public class ProductController {
 
     //update product
     @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable int id, @RequestBody Product updatedProduct) {
+    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product updatedProduct) {
         Product updated = productService.updateProduct(id, updatedProduct);
         return ResponseEntity.ok(updated);
     }
 
     //delete product
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteProduct(@PathVariable("id") int productId) {
+    public ResponseEntity<String> deleteProduct(@PathVariable("id") Long productId) {
         productService.deleteProduct(productId);
         return ResponseEntity.ok("Product with ID " + productId + " has been removed.");
     }
 
     //get product by id
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable("id") int productId) {
+    public ResponseEntity<Product> getProductById(@PathVariable("id") Long productId) {
         Product product = productService.getProductById(productId);
         return ResponseEntity.ok(product);
     }

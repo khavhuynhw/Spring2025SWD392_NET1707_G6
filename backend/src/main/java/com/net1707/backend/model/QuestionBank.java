@@ -13,7 +13,7 @@ import lombok.*;
 public class QuestionBank {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long questionId;
 
     private String question;
     private String type;

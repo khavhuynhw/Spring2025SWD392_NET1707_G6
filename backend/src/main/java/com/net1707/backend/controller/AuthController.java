@@ -1,9 +1,9 @@
 package com.net1707.backend.controller;
 
-import com.net1707.backend.dto.LoginReponseDTO;
-import com.net1707.backend.dto.LoginRequestDTO;
-import com.net1707.backend.dto.RegisterRequestDTO;
-import com.net1707.backend.dto.StaffRegisterDTO;
+import com.net1707.backend.dto.response.LoginReponseDTO;
+import com.net1707.backend.dto.request.LoginRequestDTO;
+import com.net1707.backend.dto.request.RegisterRequestDTO;
+import com.net1707.backend.dto.request.StaffRegisterDTO;
 import com.net1707.backend.repository.CustomerRepository;
 import com.net1707.backend.repository.StaffRepository;
 import com.net1707.backend.security.JwtUtil;

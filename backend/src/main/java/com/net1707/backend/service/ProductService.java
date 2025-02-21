@@ -27,7 +27,7 @@ public class ProductService {
 
     //update details product
     @Transactional
-    public Product updateProduct(int productId,Product updatedProduct) {
+    public Product updateProduct(Long productId,Product updatedProduct) {
         Optional<Product> existingProductOpt = productRepository.findById(productId);
         if(existingProductOpt.isPresent()) {
             Product existingProduct = existingProductOpt.get();
@@ -44,12 +44,12 @@ public class ProductService {
     }
 
     //delete product
-    public void deleteProduct(int productId) {
+    public void deleteProduct(Long productId) {
         productRepository.deleteById(productId);
     }
 
     //get product by id
-    public Product getProductById(int productId) {
+    public Product getProductById(Long productId) {
         return productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException
                         ("Product not found with id: " + productId));

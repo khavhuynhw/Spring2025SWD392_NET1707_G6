@@ -1,4 +1,4 @@
-package com.net1707.backend.dto;
+package com.net1707.backend.dto.response;
 
 import lombok.Getter;
 import lombok.Setter;
