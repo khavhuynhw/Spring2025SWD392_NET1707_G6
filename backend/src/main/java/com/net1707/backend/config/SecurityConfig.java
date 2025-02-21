@@ -42,16 +42,16 @@ public class SecurityConfig {
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .csrf(csrf -> csrf.disable()) // Tắt CSRF
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**",
+                        .requestMatchers("/auth/**","/uploads/**",
                                 "/swagger-ui/**", // Cho phép Swagger UI truy cập
                                 "/v3/api-docs/**" // Cho phép OpenAPI truy cập
                         ).permitAll() // ✅ Đảm bảo login API được phép truy cập
                         .requestMatchers("/customer/**").hasRole("CUSTOMER")
                         .anyRequest().authenticated()
                 )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Không dùng session
-                .formLogin(form -> form.disable()) // ✅ Tắt form login mặc định của Spring Security
-                .httpBasic(httpBasic -> httpBasic.disable()); // ✅ Tắt Basic Authentication
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)) // use session
+                .formLogin(form -> form.disable()) // ✅ off form login Spring Security
+                .httpBasic(httpBasic -> httpBasic.disable()); // ✅ off Basic Authentication
 
         return http.build();
     }
@@ -70,6 +70,8 @@ public class SecurityConfig {
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
+        configuration.setAllowCredentials(true);
+        configuration.addExposedHeader("Authorization");
         return source;
     }
 }
