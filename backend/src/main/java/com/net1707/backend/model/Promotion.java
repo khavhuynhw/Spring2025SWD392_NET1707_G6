@@ -1,12 +1,11 @@
 package com.net1707.backend.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
-
+@Getter
+@Setter
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor

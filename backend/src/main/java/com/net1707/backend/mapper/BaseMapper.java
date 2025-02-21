@@ -9,7 +9,7 @@ abstract class BaseMapper<D,E> {
     public abstract D toDto(E entity);
     public abstract E toEntity(D dto);
 
-    List<E> toEntities(List<D> dtos) {
+    public List<E> toEntities(List<D> dtos) {
         if (dtos == null) {
             return Collections.emptyList();
         }
@@ -19,7 +19,7 @@ abstract class BaseMapper<D,E> {
                 .collect(Collectors.toList());
     }
 
-    List<D> toDTOs(List<E> entities) {
+    public List<D> toDTOs(List<E> entities) {
         if (entities == null) {
             return Collections.emptyList();
         }

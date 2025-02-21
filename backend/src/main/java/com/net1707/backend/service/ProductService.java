@@ -1,73 +1,50 @@
 package com.net1707.backend.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.net1707.backend.dto.AddProductDTO;
 import com.net1707.backend.dto.UpdateProductDTO;
 import com.net1707.backend.model.Product;
 import com.net1707.backend.repository.ProductRepository;
-import com.net1707.backend.service.Interface.IFileStorageService;
 import com.net1707.backend.service.Interface.IProductService;
 import jakarta.transaction.Transactional;
 
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class ProductService implements IProductService{
 
     private final ProductRepository productRepository;
-    private final ObjectMapper objectMapper;
-    private final IFileStorageService iFileStorageService;
 
-    public ProductService(ProductRepository productRepository, ObjectMapper objectMapper, IFileStorageService iFileStorageService) {
-        this.productRepository = productRepository;
-        this.objectMapper = objectMapper;
-        this.iFileStorageService = iFileStorageService;
-    }
 
     //add new product
     @Override
     @Transactional
-    public Product addProduct(String productJson, MultipartFile file) throws IOException {
-        AddProductDTO productDTO = objectMapper.readValue(productJson, AddProductDTO.class);
-        productDTO.setImageURL(iFileStorageService.saveFile(file));
-
-        Product newProduct = new Product(); // change DTO to Entity
+    public Product addProduct(AddProductDTO productDTO) {
+        Product newProduct = new Product();
         newProduct.setProductName(productDTO.getProductName());
         newProduct.setDescription(productDTO.getDescription());
         newProduct.setPrice(productDTO.getPrice());
         newProduct.setCategory(productDTO.getCategory());
         newProduct.setSkinTypeCompatibility(productDTO.getSkinTypeCompatibility());
-        newProduct.setImageURL(productDTO.getImageURL());
+
         return productRepository.save(newProduct);
     }
 
     //update details product
     @Override
     @Transactional
-    public Product updateProduct(int id, String productJson, MultipartFile file) throws IOException {
-        UpdateProductDTO productDTO = objectMapper.readValue(productJson, UpdateProductDTO.class);
+    public Product updateProduct(int id, UpdateProductDTO productDTO) {
         if (id != productDTO.getProductID()) {
             throw new IllegalArgumentException("Product ID mismatch");
         }
 
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Product not found"));
-
-        if (file != null && !file.isEmpty()) {
-            iFileStorageService.deleteFile(existingProduct.getImageURL()); // delete old image
-            existingProduct.setImageURL(iFileStorageService.saveFile(file));    // save new image
-        }
 
         if (productDTO.getProductName() != null) {
             existingProduct.setProductName(productDTO.getProductName());
@@ -83,6 +60,10 @@ public class ProductService implements IProductService{
         }
         if (productDTO.getSkinTypeCompatibility() != null) {
             existingProduct.setSkinTypeCompatibility(productDTO.getSkinTypeCompatibility());
+        }
+
+        if(productDTO.getImageURL() != null){
+            existingProduct.setImageURL(productDTO.getImageURL());
         }
 
         return productRepository.save(existingProduct);
