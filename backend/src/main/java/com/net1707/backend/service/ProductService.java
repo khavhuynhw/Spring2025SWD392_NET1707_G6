@@ -1,31 +1,38 @@
 package com.net1707.backend.service;
 
+import com.net1707.backend.dto.AddProductDTO;
+import com.net1707.backend.dto.UpdateProductDTO;
 import com.net1707.backend.model.Product;
 import com.net1707.backend.repository.ProductRepository;
+import com.net1707.backend.service.Interface.IProductService;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
-import java.util.Optional;
 
 @Service
-public class ProductService {
-    @Autowired
-    private ProductRepository productRepository;
+public class ProductService implements IProductService{
+
+    private final ProductRepository productRepository;
+
+    public ProductService(ProductRepository productRepository) {
+        this.productRepository = productRepository;
+    }
 
     //add new product
-    public Product addProduct(Product product) {
-        if (product.getProductID() != 0) { // If ID exists, it's a detached entity; handle gracefully
-            Optional<Product> existingOpt = productRepository.findById(product.getProductID());
-            if (existingOpt.isPresent()) {
-                throw new RuntimeException("Cannot add. Product with ID " + product.getProductID() + " already exists.");
-            }
-        }
-        return productRepository.save(product);
+    @Override
+    @Transactional
+    public Product addProduct(AddProductDTO product) {
+        Product newProduct = new Product();
+        newProduct.setProductName(product.getProductName());
+        newProduct.setDescription(product.getDescription());
+        newProduct.setPrice(product.getPrice());
+        newProduct.setCategory(product.getCategory());
+        newProduct.setSkinTypeCompatibility(product.getSkinTypeCompatibility());
+        return productRepository.save(newProduct);
     }
 
     //update details product
+    @Override
     @Transactional
     public Product updateProduct(Long productId,Product updatedProduct) {
         Optional<Product> existingProductOpt = productRepository.findById(productId);
@@ -49,13 +56,15 @@ public class ProductService {
     }
 
     //get product by id
-    public Product getProductById(Long productId) {
+    @Override
+    public Product getProductById(int productId) {
         return productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException
                         ("Product not found with id: " + productId));
     }
 
     //get all product
+    @Override
     public List<Product> getAllProduct() {
         return productRepository.findAll();
     }
