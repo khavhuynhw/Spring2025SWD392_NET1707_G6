@@ -1,6 +1,7 @@
 package com.net1707.backend.service;
 
 
+import com.google.common.base.Preconditions;
 import com.net1707.backend.dto.request.ChangePasswordRequestDTO;
 import com.net1707.backend.dto.request.LoginRequestDTO;
 import com.net1707.backend.dto.request.RegisterRequestDTO;
@@ -90,9 +91,14 @@ public class AuthService implements IAuthService {
     public boolean changePassword(Long userId, ChangePasswordRequestDTO dto) {
         Customer user = customerRepository.findById(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        Preconditions.checkState(dto.getOldPassword().strip().equals(dto.getOldPassword()), "Password must not contain spaces");
+        Preconditions.checkState(dto.getNewPassword().strip().equals(dto.getNewPassword()), "Password must not contain spaces");
+        Preconditions.checkState(dto.getNewPassword().length() >= 8, "Password must be at least 8 characters long");
+        Preconditions.checkState(dto.getNewPassword().length() <= 30, "Password must not be longer than 30 characters");
+        Preconditions.checkState(dto.getNewPassword().equals(dto.getConfirmPassword()), "New password and confirm password must match");
 
         if (!passwordEncoder.matches(dto.getOldPassword(), user.getPassword())) {
-            return false;
+            throw new IllegalArgumentException("Old password is incorrect!");
         }
 
         user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
