@@ -8,6 +8,7 @@ import com.net1707.backend.service.Interface.IProductService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProductService implements IProductService{
@@ -34,8 +35,8 @@ public class ProductService implements IProductService{
     //update details product
     @Override
     @Transactional
-    public Product updateProduct(Long productId,Product updatedProduct) {
-        Optional<Product> existingProductOpt = productRepository.findById(productId);
+    public Product updateProduct(UpdateProductDTO updatedProduct) {
+        Optional<Product> existingProductOpt = productRepository.findById(updatedProduct.getProductID());
         if(existingProductOpt.isPresent()) {
             Product existingProduct = existingProductOpt.get();
             existingProduct.setProductName(updatedProduct.getProductName());
@@ -43,10 +44,10 @@ public class ProductService implements IProductService{
             existingProduct.setPrice(updatedProduct.getPrice());
             existingProduct.setCategory(updatedProduct.getCategory());
             existingProduct.setSkinTypeCompatibility(updatedProduct.getSkinTypeCompatibility());
-            existingProduct.setStockQuantity(updatedProduct.getStockQuantity());
+            
             return productRepository.save(existingProduct);
         } else {
-            throw new RuntimeException("Product not found with id: " + productId);
+            throw new RuntimeException("Product not found with id: " + updatedProduct.getProductID());
         }
     }
 
@@ -57,7 +58,7 @@ public class ProductService implements IProductService{
 
     //get product by id
     @Override
-    public Product getProductById(int productId) {
+    public Product getProductById(Long productId) {
         return productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException
                         ("Product not found with id: " + productId));

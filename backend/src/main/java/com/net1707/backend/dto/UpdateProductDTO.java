@@ -6,19 +6,21 @@ import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UpdateProductDTO {
     @PositiveOrZero(message = "Product ID must not be negative")
-    private int productID;
+    private Long productID;
 
     private String productName;
 
     private String description;
 
     @PositiveOrZero(message = "Price must not be negative")
-    private Float price;
+    private BigDecimal price;
 
     private String category;
 
