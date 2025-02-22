@@ -26,6 +26,10 @@ public class OrderDetail {
     @JoinColumn(name = "productId", nullable = false)
     private Product product;
 
+    @ManyToOne
+    @JoinColumn(name = "batchId", nullable = false)
+    private ProductBatch productBatch;
+
     @Column(nullable = false)
     private Integer quantity;
 
