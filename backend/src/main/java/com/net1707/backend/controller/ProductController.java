@@ -1,19 +1,21 @@
 package com.net1707.backend.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.net1707.backend.dto.AddProductDTO;
 import com.net1707.backend.dto.UpdateProductDTO;
 import com.net1707.backend.model.Product;
-import com.net1707.backend.service.Interface.IProductService;
-import jakarta.validation.Valid;
+import com.net1707.backend.service.Interface.IProductService;;
 import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+
+
 
 @RestController
 @RequestMapping("/products")
+@CrossOrigin(origins = "*")
 public class ProductController {
     private final IProductService productService;
 
@@ -23,9 +25,9 @@ public class ProductController {
 
     //add new product
     @PostMapping("/add")
-    public ResponseEntity<Product> addProduct(@Valid @RequestBody AddProductDTO product) {
-        Product newProduct = productService.addProduct(product);
-        return ResponseEntity.ok(newProduct);
+    public ResponseEntity<Product> addProduct(@RequestBody AddProductDTO productDTO) {
+        Product newProduct = productService.addProduct(productDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newProduct);
     }
 
     //update product

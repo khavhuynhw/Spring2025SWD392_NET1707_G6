@@ -25,4 +25,5 @@ public class AddProductDTO {
     @NotBlank(message = "Skin type compatibility is mandatory!")
     private String skinTypeCompatibility;
 
+    private String imageURL;
 }
