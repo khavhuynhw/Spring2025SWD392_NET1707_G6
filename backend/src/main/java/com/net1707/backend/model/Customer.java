@@ -30,6 +30,8 @@ public class Customer {
     @Column(nullable = false)
     private String password;
 
+    private boolean isVisible;
+
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
     private List<Order> orders;
 
