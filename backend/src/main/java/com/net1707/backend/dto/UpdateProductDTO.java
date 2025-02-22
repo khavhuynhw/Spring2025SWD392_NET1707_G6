@@ -5,11 +5,13 @@ import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 public class UpdateProductDTO {
     @PositiveOrZero(message = "Product ID must not be negative")
-    private int productID;
+    private Long productID;
 
     @NotBlank(message = "Product name is required")
     private String productName;
@@ -18,7 +20,7 @@ public class UpdateProductDTO {
     private String description;
 
     @PositiveOrZero(message = "Price must not be negative")
-    private float price;
+    private BigDecimal price;
 
     @NotBlank(message = "Category is required")
     private String category;

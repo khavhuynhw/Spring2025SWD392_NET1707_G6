@@ -30,7 +30,7 @@ public class ProductController {
 
     //update product
     @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable int id,
+    public ResponseEntity<Product> updateProduct(@PathVariable Long id,
                                                  @Valid @RequestBody UpdateProductDTO productDTO) {
         if(id != productDTO.getProductID()){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
@@ -41,7 +41,7 @@ public class ProductController {
 
     //delete product
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteProduct(@PathVariable("id") @Positive(message = "ID must be positive") int productId) {
+    public ResponseEntity<String> deleteProduct(@PathVariable("id") @Positive(message = "ID must be positive") Long productId) {
         try {
             productService.deleteProduct(productId);
             return ResponseEntity.ok("Product with ID " + productId + " has been removed.");
@@ -54,7 +54,7 @@ public class ProductController {
     //get product by id
     @GetMapping("/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable("id")
-                                                      @Positive(message = "ID must be positive") int productId) {
+                                                      @Positive(message = "ID must be positive") Long productId) {
         try {
             Product product = productService.getProductById(productId);
             return ResponseEntity.ok(product);
