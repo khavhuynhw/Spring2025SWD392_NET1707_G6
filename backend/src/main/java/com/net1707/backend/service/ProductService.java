@@ -6,72 +6,52 @@ import com.net1707.backend.model.Product;
 import com.net1707.backend.repository.ProductRepository;
 import com.net1707.backend.service.Interface.IProductService;
 import jakarta.transaction.Transactional;
-
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
-@RequiredArgsConstructor
 public class ProductService implements IProductService{
 
     private final ProductRepository productRepository;
 
+    public ProductService(ProductRepository productRepository) {
+        this.productRepository = productRepository;
+    }
 
     //add new product
     @Override
     @Transactional
-    public Product addProduct(AddProductDTO productDTO) {
+    public Product addProduct(AddProductDTO product) {
         Product newProduct = new Product();
-        newProduct.setProductName(productDTO.getProductName());
-        newProduct.setDescription(productDTO.getDescription());
-        newProduct.setPrice(productDTO.getPrice());
-        newProduct.setCategory(productDTO.getCategory());
-        newProduct.setSkinTypeCompatibility(productDTO.getSkinTypeCompatibility());
-
+        newProduct.setProductName(product.getProductName());
+        newProduct.setDescription(product.getDescription());
+        newProduct.setPrice(product.getPrice());
+        newProduct.setCategory(product.getCategory());
+        newProduct.setSkinTypeCompatibility(product.getSkinTypeCompatibility());
         return productRepository.save(newProduct);
     }
 
     //update details product
     @Override
     @Transactional
-    public Product updateProduct(int id, UpdateProductDTO productDTO) {
-        if (id != productDTO.getProductID()) {
-            throw new IllegalArgumentException("Product ID mismatch");
+    public Product updateProduct(Long productId,Product updatedProduct) {
+        Optional<Product> existingProductOpt = productRepository.findById(productId);
+        if(existingProductOpt.isPresent()) {
+            Product existingProduct = existingProductOpt.get();
+            existingProduct.setProductName(updatedProduct.getProductName());
+            existingProduct.setDescription(updatedProduct.getDescription());
+            existingProduct.setPrice(updatedProduct.getPrice());
+            existingProduct.setCategory(updatedProduct.getCategory());
+            existingProduct.setSkinTypeCompatibility(updatedProduct.getSkinTypeCompatibility());
+            existingProduct.setStockQuantity(updatedProduct.getStockQuantity());
+            return productRepository.save(existingProduct);
+        } else {
+            throw new RuntimeException("Product not found with id: " + productId);
         }
-
-        Product existingProduct = productRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Product not found"));
-
-        if (productDTO.getProductName() != null) {
-            existingProduct.setProductName(productDTO.getProductName());
-        }
-        if (productDTO.getDescription() != null) {
-            existingProduct.setDescription(productDTO.getDescription());
-        }
-        if (productDTO.getPrice() != null) {
-            existingProduct.setPrice(productDTO.getPrice());
-        }
-        if (productDTO.getCategory() != null) {
-            existingProduct.setCategory(productDTO.getCategory());
-        }
-        if (productDTO.getSkinTypeCompatibility() != null) {
-            existingProduct.setSkinTypeCompatibility(productDTO.getSkinTypeCompatibility());
-        }
-
-        if(productDTO.getImageURL() != null){
-            existingProduct.setImageURL(productDTO.getImageURL());
-        }
-
-        return productRepository.save(existingProduct);
     }
 
     //delete product
-    @Override
-    public void deleteProduct(int productId) {
+    public void deleteProduct(Long productId) {
         productRepository.deleteById(productId);
     }
 
@@ -87,14 +67,5 @@ public class ProductService implements IProductService{
     @Override
     public List<Product> getAllProduct() {
         return productRepository.findAll();
-    }
-
-    @Override
-    public void updateProductStock(int productId, int stock) {
-        Product existingProduct = productRepository.findById(productId)
-                .orElseThrow(() -> new RuntimeException("Product with ID "
-                        + productId+ " not found"));
-        existingProduct.setStockQuantity(existingProduct.getStockQuantity() + stock);
-        productRepository.save(existingProduct);
     }
 }

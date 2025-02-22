@@ -1,4 +1,4 @@
-package com.net1707.backend.dto;
+package com.net1707.backend.dto.request;
 
 import com.net1707.backend.model.Role;
 import jakarta.validation.constraints.Email;

@@ -10,3 +10,6 @@
 | TrungDQSE173523@fpt.edu.vn  | 	SE173523  | 	Đỗ Quang Trung    |
 | HieuNMSE173064@fpt.edu.vn   | 	SE173064  | 	Nguyễn Minh Hiếu   |
 | ThinhPTSE160302@fpt.edu.vn | 	SE160302  | 	Phan Thái Thịnh |
+
+#link gg drive
+https://drive.google.com/drive/folders/1W-E-5HLUMIB5Uv3P9Ct3BmlmiqEvIWDs

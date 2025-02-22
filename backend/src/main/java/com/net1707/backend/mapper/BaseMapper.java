@@ -1,5 +1,8 @@
 package com.net1707.backend.mapper;
 
+import com.net1707.backend.dto.StaffDTO;
+import com.net1707.backend.model.Staff;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
