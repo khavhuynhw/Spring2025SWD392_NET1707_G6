@@ -1,8 +1,10 @@
 package com.net1707.backend.controller;
 
-import com.net1707.backend.dto.LoginResponseDTO;
-import com.net1707.backend.dto.RegisterRequestDTO;
-import com.net1707.backend.dto.StaffRegisterDTO;
+import com.net1707.backend.dto.request.ChangePasswordRequestDTO;
+import com.net1707.backend.dto.request.LoginRequestDTO;
+import com.net1707.backend.dto.request.RegisterRequestDTO;
+import com.net1707.backend.dto.request.StaffRegisterDTO;
+import com.net1707.backend.dto.response.LoginResponseDTO;
 import com.net1707.backend.service.Interface.IAuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -46,6 +48,14 @@ public class AuthController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @PostMapping("/change-password/{id}")
+    public ResponseEntity<?> changePassword(@PathVariable Long id,@RequestBody ChangePasswordRequestDTO request) {
+        if(!authService.changePassword(id,request)){
+            return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+        }
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
 }
