@@ -31,6 +31,7 @@ public class CustomerMapper extends BaseMapper<CustomerDTO, Customer> {
                 .fullName(dto.getFullName())
                 .email(dto.getEmail())
                 .phone(dto.getPhone())
+                .address(dto.getAddress())
                 .build();
     }
 }
