@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +14,9 @@ import java.util.function.Function;
 
 @Component
 public class JwtUtil {
+
+//    @Value("${jwt.secret}")
+//    private static String SECRET;
 
     private static final String SECRET = "X2aX12XZb6aJDAcXKrjUO4Z7GtcBAzYzJylLAL0ir5GZdJMMdAzgs53AVgrS"; // Ít nhất 256-bit
     private final Key SECRET_KEY = Keys.hmacShaKeyFor(SECRET.getBytes());

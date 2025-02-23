@@ -5,6 +5,8 @@ import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 public class AddProductDTO {
@@ -15,7 +17,7 @@ public class AddProductDTO {
     private String description;
 
     @PositiveOrZero(message = "Price must not be a negative number!")
-    private float price;
+    private BigDecimal price;
 
     @NotBlank(message = "Category field is required!")
     private String category;
@@ -23,4 +25,5 @@ public class AddProductDTO {
     @NotBlank(message = "Skin type compatibility is mandatory!")
     private String skinTypeCompatibility;
 
+    private String imageURL;
 }

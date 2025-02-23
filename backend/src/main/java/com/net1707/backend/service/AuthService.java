@@ -1,7 +1,11 @@
 package com.net1707.backend.service;
 
-import com.net1707.backend.dto.RegisterRequestDTO;
-import com.net1707.backend.dto.StaffRegisterDTO;
+
+import com.google.common.base.Preconditions;
+import com.net1707.backend.dto.request.ChangePasswordRequestDTO;
+import com.net1707.backend.dto.request.LoginRequestDTO;
+import com.net1707.backend.dto.request.RegisterRequestDTO;
+import com.net1707.backend.dto.request.StaffRegisterDTO;
 import com.net1707.backend.model.Customer;
 import com.net1707.backend.model.Staff;
 import com.net1707.backend.repository.CustomerRepository;
@@ -11,6 +15,7 @@ import com.net1707.backend.service.Interface.IAuthService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -80,6 +85,25 @@ public class AuthService implements IAuthService {
         } catch (Exception e) {
             throw new RuntimeException("Invalid email or password");
         }
+    }
+
+    @Override
+    public boolean changePassword(Long userId, ChangePasswordRequestDTO dto) {
+        Customer user = customerRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        Preconditions.checkState(dto.getOldPassword().strip().equals(dto.getOldPassword()), "Password must not contain spaces");
+        Preconditions.checkState(dto.getNewPassword().strip().equals(dto.getNewPassword()), "Password must not contain spaces");
+        Preconditions.checkState(dto.getNewPassword().length() >= 8, "Password must be at least 8 characters long");
+        Preconditions.checkState(dto.getNewPassword().length() <= 30, "Password must not be longer than 30 characters");
+        Preconditions.checkState(dto.getNewPassword().equals(dto.getConfirmPassword()), "New password and confirm password must match");
+
+        if (!passwordEncoder.matches(dto.getOldPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Old password is incorrect!");
+        }
+
+        user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        customerRepository.save(user);
+        return true;
     }
 
 
