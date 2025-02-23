@@ -33,7 +33,7 @@ public class ProductBatchService implements IProductBatchService {
             productBatch.setQuantity(productBatchDTO.getQuantity());
             productBatch.setImportDate(productBatchDTO.getImportDate());
             productBatch.setExpireDate(productBatchDTO.getExpireDate());
-            productService.updateProductStock(productBatchDTO.getProductID(), productBatchDTO.getQuantity());
+//            productService.updateProductStock(productBatchDTO.getProductID(), productBatchDTO.getQuantity());
             return productBatchRepository.save(productBatch);
         }
     }

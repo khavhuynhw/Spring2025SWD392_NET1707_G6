@@ -21,7 +21,7 @@ public class CartService implements ICartService {
 
 
     @Override
-    public String addToCart(int productId, int quantity, List<CartItemDTO> cart) {
+    public String addToCart(Long productId, int quantity, List<CartItemDTO> cart) {
         Product product = iProductService.getProductById(productId);
         for (CartItemDTO item : cart) {
             if (item.getProductId() == productId) {
@@ -37,7 +37,7 @@ public class CartService implements ICartService {
     }
 
     @Override
-    public String removeFromCart(int productId, List<CartItemDTO> cart) {
+    public String removeFromCart(Long productId, List<CartItemDTO> cart) {
         boolean removed = cart.removeIf(item -> item.getProductId() == productId);
         return removed ? "Product removed from cart" : "Product not found in cart";
     }

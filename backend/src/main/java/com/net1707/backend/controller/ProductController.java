@@ -5,6 +5,7 @@ import com.net1707.backend.dto.AddProductDTO;
 import com.net1707.backend.dto.UpdateProductDTO;
 import com.net1707.backend.model.Product;
 import com.net1707.backend.service.Interface.IProductService;;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

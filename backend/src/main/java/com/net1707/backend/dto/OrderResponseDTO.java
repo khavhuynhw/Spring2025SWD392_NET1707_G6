@@ -17,6 +17,6 @@ public class OrderResponseDTO {
     private LocalDate orderDate;
     private int totalAmount;
     private String status;
-    private Integer customerId;
+    private Long customerId;
     private List<OrderDetailResponseDTO> orderDetails;
 }

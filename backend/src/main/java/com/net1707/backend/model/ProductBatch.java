@@ -20,7 +20,7 @@ public class ProductBatch {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer batchId;
+    private Long batchId;
 
     @ManyToOne
     @JoinColumn(name = "ProductID")

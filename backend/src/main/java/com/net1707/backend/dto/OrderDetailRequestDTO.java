@@ -7,13 +7,15 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Data
 @Builder
 @Getter
 @Setter
 public class OrderDetailRequestDTO {
-    private Integer productId;
-    private Integer batchId;
+    private Long productId;
+    private Long batchId;
     private Integer quantity;
-    private Float unitPrice;
+    private BigDecimal unitPrice;
 }

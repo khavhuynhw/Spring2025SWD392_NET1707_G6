@@ -7,9 +7,9 @@ import java.util.List;
 
 public interface ICartService {
 
-        String addToCart(int productId, int quantity, List<CartItemDTO> cart);
+        String addToCart(Long productId, int quantity, List<CartItemDTO> cart);
 
-        String removeFromCart(int productId, List<CartItemDTO> cart);
+        String removeFromCart(Long productId, List<CartItemDTO> cart);
 
         String clearCart(SessionStatus status);
 

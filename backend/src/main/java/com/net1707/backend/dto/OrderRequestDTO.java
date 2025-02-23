@@ -14,8 +14,8 @@ import java.util.List;
 public class OrderRequestDTO {
     private LocalDate orderDate;
     private int totalAmount;
-    private Integer customerId;
+    private Long customerId;
     private Long promotionId;
-    private Integer staffId;
+    private Long staffId;
     private List<OrderDetailRequestDTO> orderDetails;
 }

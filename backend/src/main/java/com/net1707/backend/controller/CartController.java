@@ -44,13 +44,13 @@ public class CartController {
 //    }
 
     @PostMapping("/add")
-    public ResponseEntity<String> addToCart(@RequestParam int productId, @RequestParam int quantity,
+    public ResponseEntity<String> addToCart(@RequestParam Long productId, @RequestParam int quantity,
                                             @ModelAttribute("cart") List<CartItemDTO> cart) {
         return ResponseEntity.ok(iCartService.addToCart(productId, quantity, cart));
     }
 
     @DeleteMapping("/remove/{productId}")
-    public ResponseEntity<String> removeFromCart(@PathVariable int productId, @ModelAttribute("cart") List<CartItemDTO> cart) {
+    public ResponseEntity<String> removeFromCart(@PathVariable Long productId, @ModelAttribute("cart") List<CartItemDTO> cart) {
         return ResponseEntity.ok(iCartService.removeFromCart(productId, cart));
     }
 

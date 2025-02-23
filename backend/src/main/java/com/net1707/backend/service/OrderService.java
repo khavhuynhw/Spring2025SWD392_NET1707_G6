@@ -28,47 +28,47 @@ public class OrderService implements IOrderService {
     private final OrderMapper orderMapper;
     private final OrderDetailMapper orderDetailMapper;
 
-    @Override
-    @Transactional
-    public OrderResponseDTO createOrder(OrderRequestDTO orderRequestDTO) {
-        // Lấy Customer, Staff, Promotion từ Database
-        Customer customer = customerRepository.findById(orderRequestDTO.getCustomerId())
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
-        Staff staff = staffRepository.findById(orderRequestDTO.getStaffId())
-                .orElseThrow(() -> new RuntimeException("Staff not found"));
-        Promotion promotion = orderRequestDTO.getPromotionId() != null
-                ? promotionRepository.findById(orderRequestDTO.getPromotionId()).orElse(null)
-                : null;
-
-        // Dùng Mapper để chuyển DTO -> Entity
-        Order order = orderMapper.toEntity(orderRequestDTO);
-        order.setCustomer(customer);
-        order.setStaff(staff);
-        order.setPromotion(promotion);
-        order.setStatus(Order.OrderStatus.PENDING);  // Mặc định là PENDING
-        order = orderRepository.save(order);  // Lưu Order trước để lấy ID
-
-        final Order savedOrder = order;
-
-        // Chuyển danh sách OrderDetailRequestDTO -> OrderDetail Entity
-        List<OrderDetail> orderDetails = orderRequestDTO.getOrderDetails().stream().map(dto -> {
-            Product product = productRepository.findById(dto.getProductId())
-                    .orElseThrow(() -> new RuntimeException("Product not found"));
-            ProductBatch batch = productBatchRepository.findById(dto.getBatchId())
-                    .orElseThrow(() -> new RuntimeException("Batch not found"));
-
-            OrderDetail orderDetail = orderDetailMapper.toEntity(dto);
-            orderDetail.setOrder(savedOrder);
-            orderDetail.setProduct(product);
-            orderDetail.setProductBatch(batch);
-            return orderDetail;
-        }).toList();
-
-        orderDetailRepository.saveAll(orderDetails);  // Lưu danh sách OrderDetail
-        order.setOrderDetails(orderDetails);  // Gán vào Order
-
-        return convertToOrderResponseDTO(order);
-    }
+//    @Override
+//    @Transactional
+//    public OrderResponseDTO createOrder(OrderRequestDTO orderRequestDTO) {
+//        // Lấy Customer, Staff, Promotion từ Database
+//        Customer customer = customerRepository.findById(orderRequestDTO.getCustomerId())
+//                .orElseThrow(() -> new RuntimeException("Customer not found"));
+//        Staff staff = staffRepository.findById(orderRequestDTO.getStaffId())
+//                .orElseThrow(() -> new RuntimeException("Staff not found"));
+//        Promotion promotion = orderRequestDTO.getPromotionId() != null
+//                ? promotionRepository.findById(orderRequestDTO.getPromotionId()).orElse(null)
+//                : null;
+//
+//        // Dùng Mapper để chuyển DTO -> Entity
+//        Order order = orderMapper.toEntity(orderRequestDTO);
+//        order.setCustomer(customer);
+//        order.setStaff(staff);
+//        order.setPromotion(promotion);
+//        order.setStatus(Order.OrderStatus.PENDING);  // Mặc định là PENDING
+//        order = orderRepository.save(order);  // Lưu Order trước để lấy ID
+//
+//        final Order savedOrder = order;
+//
+//        // Chuyển danh sách OrderDetailRequestDTO -> OrderDetail Entity
+//        List<OrderDetail> orderDetails = orderRequestDTO.getOrderDetails().stream().map(dto -> {
+//            Product product = productRepository.findById(dto.getProductId())
+//                    .orElseThrow(() -> new RuntimeException("Product not found"));
+//            ProductBatch batch = productBatchRepository.findById(dto.getBatchId())
+//                    .orElseThrow(() -> new RuntimeException("Batch not found"));
+//
+//            OrderDetail orderDetail = orderDetailMapper.toEntity(dto);
+//            orderDetail.setOrder(savedOrder);
+//            orderDetail.setProduct(product);
+//            orderDetail.setProductBatch(batch);
+//            return orderDetail;
+//        }).toList();
+//
+//        orderDetailRepository.saveAll(orderDetails);  // Lưu danh sách OrderDetail
+//        order.setOrderDetails(orderDetails);  // Gán vào Order
+//
+//        return convertToOrderResponseDTO(order);
+//    }
 
     private OrderResponseDTO convertToOrderResponseDTO(Order order) {
         List<OrderDetailResponseDTO> orderDetails = order.getOrderDetails().stream()
@@ -81,7 +81,7 @@ public class OrderService implements IOrderService {
                 .collect(Collectors.toList());
 
         return new OrderResponseDTO(
-                order.getId(),
+                order.getOrderId(),
                 order.getOrderDate(),
                 order.getTotalAmount(),
                 order.getStatus().name(),
@@ -91,6 +91,8 @@ public class OrderService implements IOrderService {
     }
 
 
-
-
+    @Override
+    public OrderResponseDTO createOrder(OrderRequestDTO orderRequestDTO) {
+        return null;
+    }
 }

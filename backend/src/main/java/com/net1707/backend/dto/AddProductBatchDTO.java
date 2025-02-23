@@ -12,7 +12,7 @@ import java.util.Date;
 @Setter
 public class AddProductBatchDTO {
     @Positive(message = "Product ID must be greater than zero")
-    private Integer ProductID;
+    private Long ProductID;
 
     @Positive(message = "Quantity must be greater than zero")
     private Integer Quantity;
