@@ -77,7 +77,6 @@ public class StaffController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteStaff(@PathVariable("id") Long id) {
         logger.info("REST request to delete staff member with ID: {}", id);
-        logger.info("REST request to delete staff member with ID: {}as", id);
         staffService.deleteStaff(id);
         return ResponseEntity.noContent().build();
     }
