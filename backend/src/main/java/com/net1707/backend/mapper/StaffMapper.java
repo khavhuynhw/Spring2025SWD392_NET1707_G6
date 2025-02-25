@@ -17,6 +17,7 @@ public class StaffMapper extends BaseMapper<StaffDTO, Staff> {
                 .fullname(entity.getFullname())
                 .email(entity.getEmail())
                 .phone(entity.getPhone())
+                .password(entity.getPassword() != null ? entity.getPassword() : null)
                 .role(entity.getRole())
                 .build();
     }
@@ -31,6 +32,7 @@ public class StaffMapper extends BaseMapper<StaffDTO, Staff> {
                 .fullname(dto.getFullname())
                 .email(dto.getEmail())
                 .phone(dto.getPhone())
+                .password(dto.getPassword() != null ? dto.getPassword() : null)
                 .role(dto.getRole())
                 .build();
     }
