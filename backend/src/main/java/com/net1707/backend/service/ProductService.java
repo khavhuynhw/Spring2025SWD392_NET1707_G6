@@ -26,16 +26,7 @@ public class ProductService implements IProductService{
     @Override
     @Transactional
     public ProductDTO createProduct(ProductRequestDTO productRequestDTO) {
-        Product product = Product.builder()
-                .productName(productRequestDTO.getProductName())
-                .description(productRequestDTO.getDescription())
-                .price(productRequestDTO.getPrice())
-                .category(productRequestDTO.getCategory())
-                .skinTypeCompatibility(productRequestDTO.getSkinTypeCompatibility())
-                .imageURL(productRequestDTO.getImageURL())
-                .stockQuantity(0) // Just update when have productBatch
-                .build();
-
+        Product product = productMapper.toEntity(productRequestDTO);
         Product savedProduct = productRepository.save(product);
         return productMapper.toDto(savedProduct);
     }
