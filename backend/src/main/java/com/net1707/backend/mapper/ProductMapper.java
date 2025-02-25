@@ -17,8 +17,10 @@ public class ProductMapper extends BaseMapper<ProductDTO, Product> {
                 .category(entity.getCategory())
                 .skinTypeCompatibility(entity.getSkinTypeCompatibility())
                 .stockQuantity(entity.getStockQuantity())
+                .imageURL(entity.getImageURL())
                 .build();
     }
+
 
     public Product toEntity(ProductRequestDTO dto) {
         return Product.builder()
@@ -27,8 +29,10 @@ public class ProductMapper extends BaseMapper<ProductDTO, Product> {
                 .price(dto.getPrice())
                 .category(dto.getCategory())
                 .skinTypeCompatibility(dto.getSkinTypeCompatibility())
+                .imageURL(dto.getImageURL())
                 .build();
     }
+
 
     @Override
     public Product toEntity(ProductDTO dto) {
@@ -40,6 +44,8 @@ public class ProductMapper extends BaseMapper<ProductDTO, Product> {
                 .category(dto.getCategory())
                 .skinTypeCompatibility(dto.getSkinTypeCompatibility())
                 .stockQuantity(dto.getStockQuantity())
+                .imageURL(dto.getImageURL())
                 .build();
     }
+
 }
