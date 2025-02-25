@@ -13,11 +13,15 @@ jobs:
       mysql:
         image: mysql:8
         env:
-          MYSQL_ROOT_PASSWORD: root
+          MYSQL_ROOT_PASSWORD: Trunglolb1*
           MYSQL_DATABASE: skincaredb
         ports:
           - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pTrunglolb1*"
+          --health-interval=10s 
+          --health-timeout=5s 
+          --health-retries=5
 
     steps:
       - name: Checkout code
@@ -25,7 +29,11 @@ jobs:
       
       - name: Wait for MySQL to be ready
         run: |
-          until mysqladmin ping -h 127.0.0.1 -u root -proot --silent; do
+          for i in {1..30}; do
+            if mysqladmin ping -h 127.0.0.1 -uroot -pTrunglolb1* --silent; then
+              echo "MySQL is ready!"
+              break
+            fi
             echo "Waiting for MySQL..."
             sleep 2
           done
