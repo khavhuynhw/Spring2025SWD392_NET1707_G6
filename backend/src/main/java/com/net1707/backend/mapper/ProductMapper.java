@@ -1,6 +1,7 @@
 package com.net1707.backend.mapper;
 
 import com.net1707.backend.dto.ProductDTO;
+import com.net1707.backend.dto.request.ProductRequestDTO;
 import com.net1707.backend.model.Product;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,16 @@ public class ProductMapper extends BaseMapper<ProductDTO, Product> {
                 .category(entity.getCategory())
                 .skinTypeCompatibility(entity.getSkinTypeCompatibility())
                 .stockQuantity(entity.getStockQuantity())
+                .build();
+    }
+
+    public Product toEntity(ProductRequestDTO dto) {
+        return Product.builder()
+                .productName(dto.getProductName())
+                .description(dto.getDescription())
+                .price(dto.getPrice())
+                .category(dto.getCategory())
+                .skinTypeCompatibility(dto.getSkinTypeCompatibility())
                 .build();
     }
 

@@ -1,20 +1,15 @@
-package com.net1707.backend.dto;
+package com.net1707.backend.dto.request;
 
-import lombok.*;
+import lombok.Data;
 
 import java.math.BigDecimal;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
-public class ProductDTO {
-    private Long productID;
+public class ProductRequestDTO {
     private String productName;
     private String description;
     private BigDecimal price;
     private String category;
     private String skinTypeCompatibility;
-    private int stockQuantity;
     private String imageURL;
 }

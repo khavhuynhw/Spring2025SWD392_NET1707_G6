@@ -21,14 +21,34 @@ public class JwtUtil {
     private static final String SECRET = "X2aX12XZb6aJDAcXKrjUO4Z7GtcBAzYzJylLAL0ir5GZdJMMdAzgs53AVgrS"; // Ít nhất 256-bit
     private final Key SECRET_KEY = Keys.hmacShaKeyFor(SECRET.getBytes());
 
-    public String generateToken(String email) {
+    public String generateToken(String email, String role, Long userId) {
+        Claims claims = Jwts.claims().setSubject(email);
+        claims.put("role", role);
+
+        if ("CUSTOMER".equals(role)) {
+            claims.put("customerId", userId);
+        } else {
+            claims.put("staffId", userId);
+        }
+
         return Jwts.builder()
-                .setSubject(email)
+                .setClaims(claims)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // Token hết hạn sau 1 giờ
-                .signWith(SECRET_KEY, SignatureAlgorithm.HS256) // 🔹 Dùng Key hợp lệ
+                .signWith(SECRET_KEY, SignatureAlgorithm.HS256)
                 .compact();
     }
+
+
+
+//    public String generateToken(String email) {
+//        return Jwts.builder()
+//                .setSubject(email)
+//                .setIssuedAt(new Date())
+//                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // Token hết hạn sau 1 giờ
+//                .signWith(SECRET_KEY, SignatureAlgorithm.HS256) // 🔹 Dùng Key hợp lệ
+//                .compact();
+//    }
 
     public String extractEmail(String token) {
         return extractClaim(token, Claims::getSubject);
