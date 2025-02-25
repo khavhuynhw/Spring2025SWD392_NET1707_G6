@@ -36,12 +36,6 @@ public class CartController {
         return cart.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(cart);
     }
 
-//    @GetMapping("/view")
-//    public ResponseEntity<List<CartItemDTO>> viewCart(@ModelAttribute("cart") List<CartItemDTO> cart) {
-//        return cart.isEmpty()
-//                ? ResponseEntity.noContent().build()
-//                : ResponseEntity.ok(cart);
-//    }
 
     @PostMapping("/add")
     public ResponseEntity<String> addToCart(@RequestParam Long productId, @RequestParam int quantity,

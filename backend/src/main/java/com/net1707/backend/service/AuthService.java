@@ -11,6 +11,7 @@ import com.net1707.backend.model.Staff;
 import com.net1707.backend.repository.CustomerRepository;
 import com.net1707.backend.repository.StaffRepository;
 import com.net1707.backend.security.JwtUtil;
+import com.net1707.backend.security.UserDetailsImpl;
 import com.net1707.backend.service.Interface.IAuthService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -80,7 +81,11 @@ public class AuthService implements IAuthService {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginRequestDTO.getEmail(), loginRequestDTO.getPassword()));
 
-            return jwtUtil.generateToken(loginRequestDTO.getEmail());
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+            String role = userDetails.getRole();
+            Long userId = userDetails.getId();
+
+            return jwtUtil.generateToken(userDetails.getUsername(), role, userId);
 
         } catch (Exception e) {
             throw new RuntimeException("Invalid email or password");

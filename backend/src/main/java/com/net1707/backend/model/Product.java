@@ -24,6 +24,7 @@ public class Product {
     private String category;
     private String skinTypeCompatibility;
     private int stockQuantity;
+    private String imageURL;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews;

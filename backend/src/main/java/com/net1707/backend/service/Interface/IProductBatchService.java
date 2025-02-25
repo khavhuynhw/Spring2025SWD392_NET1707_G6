@@ -1,11 +1,15 @@
 package com.net1707.backend.service.Interface;
 
-import com.net1707.backend.dto.AddProductBatchDTO;
-import com.net1707.backend.model.ProductBatch;
+import com.net1707.backend.dto.ProductBatchDTO;
+import com.net1707.backend.dto.request.ProductBatchRequestDTO;
 
-import java.util.Optional;
+import java.util.List;
+
 
 public interface IProductBatchService {
-    ProductBatch addProductBatch(AddProductBatchDTO productBatch);
-//    Optional<ProductBatch> getProductBatchById(Integer productBatchId);
+    ProductBatchDTO createBatch(ProductBatchRequestDTO requestDTO);
+    ProductBatchDTO updateBatch(Long batchId, ProductBatchRequestDTO requestDTO);
+    void deleteBatch(Long batchId);
+    ProductBatchDTO getBatchById(Long batchId);
+    List<ProductBatchDTO> getAllBatches();
 }
