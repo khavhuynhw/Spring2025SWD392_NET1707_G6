@@ -23,25 +23,30 @@ public class CartService implements ICartService {
 
 
     @Override
-    public String addToCart(Long productId, int quantity, List<CartItemDTO> cart) {
-        ProductDTO productDTO = iProductService.getProductById(productId); // get ProductDTO
-        Product product = new Product(); // create new  Product from DTO
-        product.setProductID(productDTO.getProductID());
-        product.setProductName(productDTO.getProductName());
-        product.setPrice(productDTO.getPrice());
+    public String addToCart(CartItemDTO cartItemDTO, List<CartItemDTO> cart) {
+        // Lấy thông tin sản phẩm từ ProductService
+        ProductDTO productDTO = iProductService.getProductById(cartItemDTO.getProductId());
 
+        if (productDTO == null) {
+            return "Product not found";
+        }
+
+        // Kiểm tra xem sản phẩm đã có trong giỏ hàng chưa
         for (CartItemDTO item : cart) {
-            if (item.getProductId().equals(productId)) {
-                item.setQuantity(item.getQuantity() + quantity);
+            if (item.getProductId().equals(cartItemDTO.getProductId())) {
+                item.setQuantity(item.getQuantity() + cartItemDTO.getQuantity());
                 return "Product quantity updated in cart";
             }
         }
 
-        CartItemDTO cartItem = new CartItemDTO(productId, product.getProductName(), quantity, product.getPrice());
-        cart.add(cartItem);
+        // Thêm sản phẩm mới vào giỏ hàng
+        cart.add(new CartItemDTO(cartItemDTO.getProductId(), cartItemDTO.getQuantity()));
 
         return "Product added to cart";
     }
+
+
+
 
 
     @Override
