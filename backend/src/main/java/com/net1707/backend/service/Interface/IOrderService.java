@@ -1,9 +1,15 @@
 package com.net1707.backend.service.Interface;
 
+import com.net1707.backend.dto.OrderDTO;
 import com.net1707.backend.dto.OrderRequestDTO;
-import com.net1707.backend.dto.OrderResponseDTO;
-import com.net1707.backend.model.Order;
+
+
+import java.util.List;
 
 public interface IOrderService {
-    OrderResponseDTO createOrder(OrderRequestDTO orderRequestDTO);
+    List<OrderDTO> getAllOrders();
+    OrderDTO getOrderById(Long orderId);
+    OrderDTO createOrder(OrderRequestDTO  orderRequestDTO);
+    OrderDTO updateOrder(Long orderId, OrderDTO orderDTO);
+    void deleteOrder(Long orderId);
 }

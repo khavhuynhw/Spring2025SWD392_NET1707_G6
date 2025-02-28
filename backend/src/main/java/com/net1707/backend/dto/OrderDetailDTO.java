@@ -4,14 +4,15 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class OrderDetailDTO {
     private Long orderDetailId;
-    private Long orderId;  // Reference to Order
-    private Long productId; // Reference to Product
+    private Long orderId;
+    private Long productId;
+    private Integer quantity;
     private BigDecimal unitPrice;
+    private Long batchId;
 }
