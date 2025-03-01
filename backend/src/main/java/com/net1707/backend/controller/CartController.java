@@ -44,16 +44,22 @@ public class CartController {
             @RequestHeader("Authorization") String token,
             @RequestBody CartItemDTO cartItemDTO) {
 
+        System.out.println("Received CartItemDTO: " + cartItemDTO);
+
         Long userId = jwtUtil.extractUserId(token.replace("Bearer ", ""));
 
         if (userId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        String response = iCartService.addToCart(userId, cartItemDTO); // add to cart user
+        if (cartItemDTO == null || cartItemDTO.getProduct() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid product data");
+        }
 
+        String response = iCartService.addToCart(userId, cartItemDTO);
         return ResponseEntity.ok(response);
     }
+
 
     @DeleteMapping("/remove/{productId}")
     public ResponseEntity<String> removeProduct(
@@ -70,8 +76,8 @@ public class CartController {
 
         return ResponseEntity.ok(response);
     }
-    @PutMapping("/reduce/{productId}")
-    public ResponseEntity<CartItemDTO> reduceQuantity(
+    @PutMapping("/update/{productId}")
+    public ResponseEntity<CartItemDTO> updateQuantity(
             @RequestHeader("Authorization") String token,
             @PathVariable Long productId,
             @RequestParam Integer quantity) {
@@ -82,14 +88,15 @@ public class CartController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        CartItemDTO updatedCartItem = iCartService.reduceQuantity(userId, productId, quantity); // reduce quantity
+        CartItemDTO updatedCartItem = iCartService.updateQuantity(userId, productId, quantity); // call service to update quantity
 
         if (updatedCartItem == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Not Found
         }
 
         return ResponseEntity.ok(updatedCartItem);
     }
+
 
 
     @DeleteMapping("/clear")

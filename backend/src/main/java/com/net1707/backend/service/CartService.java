@@ -95,26 +95,28 @@ public class CartService implements ICartService {
 
     //reduce quantity
     @Override
-    public CartItemDTO reduceQuantity(Long userId, Long productId, Integer quantity) {
+    public CartItemDTO updateQuantity(Long userId, Long productId, Integer quantity) {
         List<CartItemDTO> cart = userCarts.get(userId);
         if (cart == null || cart.isEmpty()) {
-            return null; // response if cart null
+            return null; // if cart is empty, response null
         }
 
         for (CartItemDTO item : cart) {
             if (Objects.equals(item.getProduct().getProductID(), productId)) {
-                if (item.getQuantity() > quantity) {
-                    item.setQuantity(item.getQuantity() - quantity); // reduce quantity
-                    return item; // response cartItem updated
-                } else {
-                    cart.remove(item); // remove product from cart ìf quantity <= 0
-                    return null; // response null if product is removed from cart
+                int stockQuantity = item.getProduct().getStockQuantity();
+                if (quantity > stockQuantity) {
+                    return item; // response old CartItem if quantity > stockQuantity
+                }
+                if (quantity > 0) {
+                    item.setQuantity(quantity); // update new quantity
+                    return item; // response cartItem update
                 }
             }
         }
 
-        return null; // response ìf not found product
+        return null;
     }
+
 
 
 
