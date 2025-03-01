@@ -11,6 +11,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/promotions")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class PromotionController {
     private final IPromotionService promotionService;
 

@@ -15,7 +15,8 @@ public interface ICartService {
 
         List<CartItemDTO> getCartByUserId(Long userId);
 
-        CartItemDTO reduceQuantity(Long userId, Long productId, Integer quantity);
+        CartItemDTO updateQuantity(Long userId, Long productId, Integer quantity);
+
 
 
 }
