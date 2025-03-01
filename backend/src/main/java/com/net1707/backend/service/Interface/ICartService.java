@@ -7,10 +7,15 @@ import java.util.List;
 
 public interface ICartService {
 
-        String addToCart(CartItemDTO cartItemDTO, List<CartItemDTO> cart);
+        String addToCart(Long userId, CartItemDTO cartItem);
 
-        String removeFromCart(Long productId, List<CartItemDTO> cart);
+        String removeFromCart(Long userId, Long productId);
 
-        String clearCart(SessionStatus status);
+        void clearCart(Long userId);
+
+        List<CartItemDTO> getCartByUserId(Long userId);
+
+        CartItemDTO reduceQuantity(Long userId, Long productId, Integer quantity);
+
 
 }

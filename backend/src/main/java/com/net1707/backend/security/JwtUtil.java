@@ -15,11 +15,14 @@ import java.util.function.Function;
 @Component
 public class JwtUtil {
 
-//    @Value("${jwt.secret}")
-//    private static String SECRET;
+    private final Key SECRET_KEY;
+    private final long EXPIRATION_TIME;
 
-    private static final String SECRET = "X2aX12XZb6aJDAcXKrjUO4Z7GtcBAzYzJylLAL0ir5GZdJMMdAzgs53AVgrS"; // Ít nhất 256-bit
-    private final Key SECRET_KEY = Keys.hmacShaKeyFor(SECRET.getBytes());
+    public JwtUtil(@Value("${jwt.secret}") String secret,
+                   @Value("${jwt.expiration}") long expirationTime) {
+        this.SECRET_KEY = Keys.hmacShaKeyFor(secret.getBytes());
+        this.EXPIRATION_TIME = expirationTime;
+    }
 
     public String generateToken(String email, String role, Long userId) {
         Claims claims = Jwts.claims().setSubject(email);
@@ -34,21 +37,24 @@ public class JwtUtil {
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // Token hết hạn sau 1 giờ
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME)) // Token hết hạn sau 1 giờ
                 .signWith(SECRET_KEY, SignatureAlgorithm.HS256)
                 .compact();
     }
+    public Long extractUserId(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(SECRET_KEY)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
 
+        String role = (String) claims.get("role");
+        if ("CUSTOMER".equals(role)) {
+            return claims.get("customerId", Long.class);
+        }
+        return null;
+    }
 
-
-//    public String generateToken(String email) {
-//        return Jwts.builder()
-//                .setSubject(email)
-//                .setIssuedAt(new Date())
-//                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // Token hết hạn sau 1 giờ
-//                .signWith(SECRET_KEY, SignatureAlgorithm.HS256) // 🔹 Dùng Key hợp lệ
-//                .compact();
-//    }
 
     public String extractEmail(String token) {
         return extractClaim(token, Claims::getSubject);

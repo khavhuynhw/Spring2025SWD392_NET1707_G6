@@ -8,6 +8,6 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CartItemDTO {
-    private Long productId;
+    private ProductDTO product;
     private Integer quantity;
 }
