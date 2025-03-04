@@ -6,9 +6,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface OrderRepository extends JpaRepository<Order,Long> {
     @Query("SELECT COUNT(o) > 0 FROM Order o WHERE o.customer.customerId = :customerId AND o.promotion.promotionId = :promotionId")
     boolean hasUsedPromotion(@Param("customerId") Long customerId, @Param("promotionId") Long promotionId);
-
+    List<Order> findByCustomer_CustomerId(Long customerId);
 }

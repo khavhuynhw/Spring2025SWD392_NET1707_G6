@@ -44,7 +44,7 @@ public class SecurityConfig {
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .csrf(csrf -> csrf.disable()) // Tắt CSRF
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**","/error/**","/products", "/products/{id}",
+                        .requestMatchers("/auth/**","/error/**","/products", "/products/{id}","/api/payment/return",
                                 "/swagger-ui/**", // Cho phép Swagger UI truy cập
                                 "/v3/api-docs/**" // Cho phép OpenAPI truy cập
                         ).permitAll() // ✅ Đảm bảo login API được phép truy cập

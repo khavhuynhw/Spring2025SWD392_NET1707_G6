@@ -4,6 +4,7 @@ import com.net1707.backend.dto.OrderDTO;
 import com.net1707.backend.dto.OrderDetailDTO;
 import com.net1707.backend.dto.OrderRequestDTO;
 import com.net1707.backend.service.Interface.IOrderService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,10 +18,13 @@ import java.util.List;
 public class OrderController {
     private final IOrderService orderService;
 
+
     @PostMapping
-    public ResponseEntity<OrderDTO> createOrder(@RequestBody OrderRequestDTO orderDTO) {
-        return ResponseEntity.ok(orderService.createOrder(orderDTO));
+    public ResponseEntity<String> createOrder(@RequestBody OrderRequestDTO orderDTO, HttpServletRequest request) {
+        String paymentUrl = orderService.createOrder(orderDTO, request);
+        return ResponseEntity.ok(paymentUrl);
     }
+
 
     @GetMapping
     public ResponseEntity<List<OrderDTO>> getAllOrders() {
@@ -47,5 +51,10 @@ public class OrderController {
     public ResponseEntity<List<OrderDetailDTO>> getOrderDetails(@PathVariable Long id) {
         OrderDTO orderDTO = orderService.getOrderById(id);
         return ResponseEntity.ok(orderDTO.getOrderDetails());
+    }
+
+    @GetMapping("/customer/{customerId}")
+    public ResponseEntity<List<OrderDTO>> getOrdersByCustomer(@PathVariable Long customerId) {
+        return ResponseEntity.ok(orderService.getOrdersByCustomer(customerId));
     }
 }
