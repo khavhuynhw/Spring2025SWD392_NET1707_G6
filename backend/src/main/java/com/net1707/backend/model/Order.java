@@ -28,7 +28,9 @@ public class Order {
     public enum OrderStatus{
         PENDING,
         SHIPPED,
-        DELIVERED
+        DELIVERED,
+        PAID,
+        CANCELLED
     }
 
     @ManyToOne(fetch = FetchType.LAZY)

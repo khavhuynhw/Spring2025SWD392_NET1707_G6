@@ -6,14 +6,14 @@ import com.net1707.backend.mapper.OrderMapper;
 import com.net1707.backend.model.*;
 import com.net1707.backend.repository.*;
 import com.net1707.backend.service.Interface.IOrderService;
+import com.net1707.backend.service.Interface.IVNPayService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,7 +28,7 @@ public class OrderService implements IOrderService {
     private final ProductBatchRepository productBatchRepository;
     private final OrderMapper orderMapper;
     private final OrderDetailMapper orderDetailMapper;
-
+    private final IVNPayService vnPayService;
 
     @Override
     public List<OrderDTO> getAllOrders() {
@@ -53,41 +53,26 @@ public class OrderService implements IOrderService {
                 .collect(Collectors.toList()));
         return dto;
     }
+
     @Override
     @Transactional
-    public OrderDTO createOrder(OrderRequestDTO  orderRequestDTO) {
-        // Lấy thông tin customer, staff, promotion nếu có
+    public String createOrder(OrderRequestDTO orderRequestDTO, HttpServletRequest request) {
         Customer customer = customerRepository.findById(orderRequestDTO.getCustomerId())
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
         Staff staff = staffRepository.findById(orderRequestDTO.getStaffId())
                 .orElseThrow(() -> new RuntimeException("Staff not found"));
 
-        // Kiểm tra nếu customer đã dùng promotion này
         Promotion promotion = null;
         if (orderRequestDTO.getPromotionId() != null) {
             promotion = promotionRepository.findById(orderRequestDTO.getPromotionId())
                     .orElseThrow(() -> new RuntimeException("Promotion not found"));
 
-            boolean hasUsed = orderRepository.hasUsedPromotion(customer.getCustomerId(), promotion.getPromotionId());
-            if (hasUsed) {
-                // Kiểm tra còn promotion khác không
-                List<Promotion> otherPromotions = promotionRepository.findAll();
-                if (otherPromotions.size() > 1) {
-                    throw new RuntimeException("You have already used this promotion. Please choose another one.");
-                } else {
-                    throw new RuntimeException("No other promotions available. You cannot use this promotion again.");
-                }
+            if (orderRepository.hasUsedPromotion(customer.getCustomerId(), promotion.getPromotionId())) {
+                throw new RuntimeException("You have already used this promotion.");
             }
         }
 
-//        Promotion promotion = null;
-//        if (orderRequestDTO.getPromotionId() != null) {
-//            promotion = promotionRepository.findById(orderRequestDTO.getPromotionId())
-//                    .orElseThrow(() -> new RuntimeException("Promotion not found"));
-//        }
-
-        // Tạo order entity
         Order order = new Order();
         order.setOrderDate(orderRequestDTO.getOrderDate());
         order.setStatus(Order.OrderStatus.PENDING);
@@ -95,7 +80,6 @@ public class OrderService implements IOrderService {
         order.setStaff(staff);
         order.setPromotion(promotion);
 
-        // Danh sách orderDetail
         List<OrderDetail> orderDetails = new ArrayList<>();
         BigDecimal totalAmount = BigDecimal.ZERO;
 
@@ -103,56 +87,49 @@ public class OrderService implements IOrderService {
             Product product = productRepository.findById(detailRequest.getProductId())
                     .orElseThrow(() -> new RuntimeException("Product not found"));
 
-            // Kiểm tra tồn kho
             if (detailRequest.getQuantity() > product.getStockQuantity()) {
                 throw new RuntimeException("Not enough stock for product ID: " + product.getProductID());
             }
 
-            // Tìm batch gần hết hạn nhất còn hàng
+            // Choose batch has expiredDate
             List<ProductBatch> batches = productBatchRepository.findByProduct(product);
             batches.sort(Comparator.comparing(ProductBatch::getExpireDate));
 
-            ProductBatch selectedBatch = batches.stream()
-                    .filter(batch -> batch.getQuantity() >= detailRequest.getQuantity())
-                    .findFirst()
-                    .orElseThrow(() -> new RuntimeException("No available batch for product ID: " + product.getProductID()));
+            ProductBatch selectedBatch = null;
+            for (ProductBatch batch : batches) {
+                if (batch.getQuantity() >= detailRequest.getQuantity()) {
+                    selectedBatch = batch;
+                    break;
+                }
+            }
 
-            // Cập nhật số lượng batch
-            selectedBatch.setQuantity(selectedBatch.getQuantity() - detailRequest.getQuantity());
-            productBatchRepository.save(selectedBatch);
+            if (selectedBatch == null) {
+                throw new RuntimeException("No available batch for product ID: " + product.getProductID());
+            }
 
-            // 🔥 CẬP NHẬT STOCK QUANTITY CỦA PRODUCT 🔥
-            product.setStockQuantity(product.getStockQuantity() - detailRequest.getQuantity());
-            productRepository.save(product);
-
-            // Tính unitPrice
             BigDecimal unitPrice = product.getPrice().multiply(BigDecimal.valueOf(detailRequest.getQuantity()));
 
-            // Tạo order detail
             OrderDetail orderDetail = new OrderDetail();
             orderDetail.setOrder(order);
             orderDetail.setProduct(product);
+            orderDetail.setProductBatch(selectedBatch); // ✅ Gán batchId vào orderDetail
             orderDetail.setQuantity(detailRequest.getQuantity());
             orderDetail.setUnitPrice(unitPrice);
-            orderDetail.setProductBatch(selectedBatch);
             orderDetails.add(orderDetail);
 
-            // Cộng dồn vào totalAmount
             totalAmount = totalAmount.add(unitPrice);
         }
 
-        // 🔥 ÁP DỤNG PROMOTION (GIẢM GIÁ) 🔥
         if (promotion != null && promotion.getDiscountPercentage() != null) {
             BigDecimal discount = totalAmount.multiply(promotion.getDiscountPercentage().divide(BigDecimal.valueOf(100)));
             totalAmount = totalAmount.subtract(discount);
         }
 
-        // Cập nhật totalAmount và lưu order
         order.setTotalAmount(totalAmount);
         order.setOrderDetails(orderDetails);
         Order savedOrder = orderRepository.save(order);
 
-        return orderMapper.toDto(savedOrder);
+        return vnPayService.createPaymentUrl(request, savedOrder.getOrderId(), savedOrder.getTotalAmount());
     }
 
 
@@ -171,5 +148,83 @@ public class OrderService implements IOrderService {
     public void deleteOrder(Long orderId) {
         orderRepository.deleteById(orderId);
     }
+
+
+
+    @Override
+    @Transactional
+    public Map<String, String> handlePaymentCallback(Map<String, String> params) {
+        System.out.println("url backdoor: " + params);
+
+        Map<String, String> response = new HashMap<>();
+
+        if (!params.containsKey("orderId") || params.get("orderId") == null) {
+            response.put("status", "failed");
+            response.put("message", "Invalid order ID");
+            return response;
+        }
+
+        Long orderId;
+        try {
+            orderId = Long.parseLong(params.get("orderId"));
+        } catch (NumberFormatException e) {
+            response.put("status", "failed");
+            response.put("message", "Order ID is not a valid number");
+            return response;
+        }
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        boolean isPaymentSuccessful = "success".equals(params.get("status"));
+
+        if (isPaymentSuccessful) {
+            order.setStatus(Order.OrderStatus.PAID);
+
+            for (OrderDetail detail : order.getOrderDetails()) {
+                Product product = detail.getProduct();
+                product.setStockQuantity(product.getStockQuantity() - detail.getQuantity());
+                productRepository.save(product);
+
+                //  delete batch
+                ProductBatch batch = detail.getProductBatch();
+                batch.setQuantity(batch.getQuantity() - detail.getQuantity());
+                productBatchRepository.save(batch);
+            }
+
+            orderRepository.save(order);
+            response.put("status", "success");
+            response.put("message", "Payment successful, order updated!");
+        } else {
+            order.setStatus(Order.OrderStatus.CANCELLED);
+            orderRepository.save(order);
+            response.put("status", "failed");
+            response.put("message", "Payment failed, order cancelled.");
+        }
+
+        return response;
+    }
+
+    @Override
+    public List<OrderDTO> getOrdersByCustomer(Long customerId) {
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        return orderRepository.findByCustomer_CustomerId(customerId).stream()
+                .map(order -> {
+                    OrderDTO dto = orderMapper.toDto(order);
+                    List<OrderDetailDTO> orderDetails = order.getOrderDetails().stream()
+                            .map(orderDetailMapper::toDto)
+                            .collect(Collectors.toList());
+                    dto.setOrderDetails(orderDetails);
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
+
+
+
+
 
 }

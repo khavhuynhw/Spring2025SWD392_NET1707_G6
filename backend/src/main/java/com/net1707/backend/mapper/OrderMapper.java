@@ -5,9 +5,6 @@ import com.net1707.backend.model.Customer;
 import com.net1707.backend.model.Order;
 import com.net1707.backend.model.Promotion;
 import com.net1707.backend.model.Staff;
-import com.net1707.backend.repository.CustomerRepository;
-import com.net1707.backend.repository.PromotionRepository;
-import com.net1707.backend.repository.StaffRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,18 +13,12 @@ import java.util.stream.Collectors;
 @Component
 public class OrderMapper extends BaseMapper<OrderDTO, Order> {
 
-    private final CustomerRepository customerRepository;
-    private final PromotionRepository promotionRepository;
-    private final StaffRepository staffRepository;
+
     private final OrderDetailMapper orderDetailMapper;
 
     @Autowired
-    public OrderMapper(CustomerRepository customerRepository,
-                       PromotionRepository promotionRepository,
-                       StaffRepository staffRepository, OrderDetailMapper orderDetailMapper) {
-        this.customerRepository = customerRepository;
-        this.promotionRepository = promotionRepository;
-        this.staffRepository = staffRepository;
+    public OrderMapper(OrderDetailMapper orderDetailMapper) {
+
         this.orderDetailMapper = orderDetailMapper;
     }
 
@@ -47,7 +38,7 @@ public class OrderMapper extends BaseMapper<OrderDTO, Order> {
                 .staffId(entity.getStaff() != null ? entity.getStaff().getStaffId() : null)
                 .orderDetails(entity.getOrderDetails() != null ? entity.getOrderDetails()
                         .stream()
-                        .map(orderDetailMapper::toDto)  // Ánh xạ danh sách OrderDetail sang DTO
+                        .map(orderDetailMapper::toDto)  // mapping list OrderDetail to DTO
                         .collect(Collectors.toList()) : null)
                 .build();
     }
@@ -63,7 +54,7 @@ public class OrderMapper extends BaseMapper<OrderDTO, Order> {
                 .status(dto.getStatus())
                 .build();
 
-        // Không fetch dữ liệu trong mapper, chỉ cần gán nếu đã có
+
         if (dto.getCustomerId() != null) {
             Customer customer = new Customer();
             customer.setCustomerId(dto.getCustomerId());
@@ -82,7 +73,7 @@ public class OrderMapper extends BaseMapper<OrderDTO, Order> {
             order.setStaff(staff);
         }
 
-        // Chuyển đổi orderDetails
+        // convert orderDetails
         if (dto.getOrderDetails() != null) {
             order.setOrderDetails(dto.getOrderDetails().stream()
                     .map(orderDetailMapper::toEntity)
