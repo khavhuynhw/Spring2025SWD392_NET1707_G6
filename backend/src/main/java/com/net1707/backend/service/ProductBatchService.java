@@ -107,6 +107,14 @@ public class ProductBatchService implements IProductBatchService {
                 .map(productBatchMapper::toDto)
                 .collect(Collectors.toList());
     }
+    @Override
+    public List<ProductBatchDTO> getBatchesByProductId(Long productId) {
+        List<ProductBatch> batches = productBatchRepository.findByProduct_ProductID(productId);
+        return batches.stream()
+                .map(productBatchMapper::toDto) // convert entity to DTO
+                .collect(Collectors.toList());
+    }
+
 
 
 }

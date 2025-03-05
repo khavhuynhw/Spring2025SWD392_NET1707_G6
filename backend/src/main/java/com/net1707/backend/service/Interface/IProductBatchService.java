@@ -2,6 +2,7 @@ package com.net1707.backend.service.Interface;
 
 import com.net1707.backend.dto.ProductBatchDTO;
 import com.net1707.backend.dto.request.ProductBatchRequestDTO;
+import com.net1707.backend.model.ProductBatch;
 
 import java.util.List;
 
@@ -12,4 +13,5 @@ public interface IProductBatchService {
     void deleteBatch(Long batchId);
     ProductBatchDTO getBatchById(Long batchId);
     List<ProductBatchDTO> getAllBatches();
+    List<ProductBatchDTO> getBatchesByProductId(Long productId);
 }
