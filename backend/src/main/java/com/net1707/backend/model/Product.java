@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -25,6 +26,23 @@ public class Product {
     private String skinTypeCompatibility;
     private int stockQuantity;
     private String imageURL;
+
+    @ElementCollection
+    @Enumerated(EnumType.STRING)
+    private Set<SkinType> suitableSkinTypes;
+
+    @ElementCollection
+    @Enumerated(EnumType.STRING)
+    private Set<SkinConcern> targetsConcerns;
+
+    private Boolean suitableForSensitiveSkin;
+    private Integer minimumAgeRecommended;
+    private Integer maximumAgeRecommended;
+
+    @ElementCollection
+    private Set<String> suitableClimateZones;
+
+    private Integer matchScore;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews;

@@ -3,6 +3,8 @@ package com.net1707.backend.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,5 +18,16 @@ public class QuestionBank {
     private Long questionId;
 
     private String question;
-    private String type;
+
+    @Enumerated(EnumType.STRING)
+    private QuestionType type;
+
+    @ElementCollection
+    private List<String> options;
+
+    public enum QuestionType {
+        SINGLE_CHOICE,
+        MULTI_CHOICE,
+        TEXT_INPUT
+    }
 }
