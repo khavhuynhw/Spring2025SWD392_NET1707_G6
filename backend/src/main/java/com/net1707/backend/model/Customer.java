@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Data
@@ -31,6 +32,19 @@ public class Customer {
     @Column(nullable = false)
     private String password;
 
+    private Integer ageRange;
+
+    @Enumerated(EnumType.STRING)
+    private SkinType primarySkinType;
+
+    @ElementCollection
+    @Enumerated(EnumType.STRING)
+    private Set<SkinConcern> skinConcerns;
+
+    private Boolean isSensitive;
+
+    private String climateZone;
+
     private boolean isVisible;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
@@ -40,6 +54,7 @@ public class Customer {
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<QuizResult> quizResults;
 }

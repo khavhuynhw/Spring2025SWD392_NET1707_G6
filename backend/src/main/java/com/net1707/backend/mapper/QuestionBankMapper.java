@@ -11,7 +11,8 @@ public class QuestionBankMapper extends BaseMapper<QuestionBankDTO,QuestionBank>
         return QuestionBankDTO.builder()
                 .questionId(questionBank.getQuestionId())
                 .question(questionBank.getQuestion())
-                .type(questionBank.getType())
+                .type(String.valueOf(questionBank.getType()))
+                .options(questionBank.getOptions())
                 .build();
     }
     @Override
@@ -19,7 +20,8 @@ public class QuestionBankMapper extends BaseMapper<QuestionBankDTO,QuestionBank>
         return QuestionBank.builder()
                 .questionId(dto.getQuestionId())
                 .question(dto.getQuestion())
-                .type(dto.getType())
+                .type(QuestionBank.QuestionType.valueOf(dto.getType()))
+                .options(dto.getOptions())
                 .build();
     }
 }
