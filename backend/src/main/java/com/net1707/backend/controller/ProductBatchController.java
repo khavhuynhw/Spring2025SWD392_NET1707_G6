@@ -80,7 +80,7 @@ public class ProductBatchController {
         return ResponseEntity.ok(batches);
     }
     //get all batch by productId
-    @GetMapping("/{productId}")
+    @GetMapping("/product/{productId}")
     public ResponseEntity<List<ProductBatchDTO>> getBatchesByProductId(@PathVariable Long productId) {
         List<ProductBatchDTO> batches = productBatchService.getBatchesByProductId(productId);
         return ResponseEntity.ok(batches);
