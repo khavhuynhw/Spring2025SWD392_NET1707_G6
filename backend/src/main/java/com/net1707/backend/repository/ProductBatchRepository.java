@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface ProductBatchRepository extends JpaRepository<ProductBatch, Long> {
     List<ProductBatch> findByProduct(Product product);
+    List<ProductBatch> findByProduct_ProductID(Long productId);
 }
