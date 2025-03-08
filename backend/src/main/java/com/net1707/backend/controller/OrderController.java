@@ -3,10 +3,13 @@ package com.net1707.backend.controller;
 import com.net1707.backend.dto.OrderDTO;
 import com.net1707.backend.dto.OrderDetailDTO;
 import com.net1707.backend.dto.OrderRequestDTO;
+import com.net1707.backend.security.UserDetailsImpl;
 import com.net1707.backend.service.Interface.IOrderService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,8 +23,17 @@ public class OrderController {
 
 
     @PostMapping
-    public ResponseEntity<String> createOrder(@RequestBody OrderRequestDTO orderDTO, HttpServletRequest request) {
-        String paymentUrl = orderService.createOrder(orderDTO, request);
+    public ResponseEntity<String> createOrder(@RequestBody OrderRequestDTO orderDTO, HttpServletRequest request,@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        if (!"CUSTOMER".equals(userDetails.getRole())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Only customers can create orders.");
+        }
+
+        // get customerId from userDetails
+        Long customerId = userDetails.getId();
+
+
+        String paymentUrl = orderService.createOrder(orderDTO, request,customerId);
         return ResponseEntity.ok(paymentUrl);
     }
 

@@ -56,12 +56,11 @@ public class OrderService implements IOrderService {
 
     @Override
     @Transactional
-    public String createOrder(OrderRequestDTO orderRequestDTO, HttpServletRequest request) {
-        Customer customer = customerRepository.findById(orderRequestDTO.getCustomerId())
+    public String createOrder(OrderRequestDTO orderRequestDTO, HttpServletRequest request,Long customerId) {
+        Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
-        Staff staff = staffRepository.findById(orderRequestDTO.getStaffId())
-                .orElseThrow(() -> new RuntimeException("Staff not found"));
+
 
         Promotion promotion = null;
         if (orderRequestDTO.getPromotionId() != null) {
@@ -77,7 +76,7 @@ public class OrderService implements IOrderService {
         order.setOrderDate(orderRequestDTO.getOrderDate());
         order.setStatus(Order.OrderStatus.PENDING);
         order.setCustomer(customer);
-        order.setStaff(staff);
+        order.setStaff(null);
         order.setPromotion(promotion);
 
         List<OrderDetail> orderDetails = new ArrayList<>();
