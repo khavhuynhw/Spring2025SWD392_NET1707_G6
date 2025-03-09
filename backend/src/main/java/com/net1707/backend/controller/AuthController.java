@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/auth")
 @CrossOrigin(origins = "*")
@@ -52,11 +54,34 @@ public class AuthController {
     }
 
     @PostMapping("/change-password/{id}")
-    public ResponseEntity<?> changePassword(@PathVariable Long id,@RequestBody ChangePasswordRequestDTO request) {
-        if(!authService.changePassword(id,request)){
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequestDTO request) {
+        if(!authService.changePassword(request)){
             return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
         }
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> requestChangePassword(@RequestBody Map<String, String> request){
+        String email = request.get("email");
+        boolean isSent = authService.requestResetPassword(email);
+        if (isSent) {
+            return ResponseEntity.ok("Verification code sent to email.");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to send verification code.");
+        }
+    }
+
+    @PostMapping("/verify-code")
+    public ResponseEntity<String> verifyCode(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String code = request.get("code");
+
+        boolean isValid = authService.validateCode(email, code);
+        if (isValid) {
+            return ResponseEntity.ok("Code verified. You can reset your password.");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid or expired code.");
+        }
+    }
 }

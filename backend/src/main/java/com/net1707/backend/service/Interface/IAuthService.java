@@ -11,5 +11,8 @@ public interface IAuthService {
     String registerStaff(StaffRegisterDTO staffRegisterDTO);
     String login(LoginRequestDTO loginRequestDTO);
 
-    boolean changePassword(Long userId, ChangePasswordRequestDTO dto);
+    boolean changePassword(ChangePasswordRequestDTO dto);
+
+    boolean requestResetPassword(String email);
+    boolean validateCode(String email, String code);
 }

@@ -16,4 +16,5 @@ public class EmailRequest {
     private String htmlContent;
     private String username;
     private String email;
+    private String code;
 }

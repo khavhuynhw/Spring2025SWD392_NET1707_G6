@@ -12,7 +12,9 @@ import com.net1707.backend.repository.CustomerRepository;
 import com.net1707.backend.repository.StaffRepository;
 import com.net1707.backend.security.JwtUtil;
 import com.net1707.backend.security.UserDetailsImpl;
+import com.net1707.backend.service.Interface.CustomerService;
 import com.net1707.backend.service.Interface.IAuthService;
+import net.jodah.expiringmap.ExpiringMap;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,21 +22,30 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+
 @Service
 public class AuthService implements IAuthService {
 
+    private final ExpiringMap<String, String> codeStorage = ExpiringMap.builder()
+            .expiration(5, TimeUnit.MINUTES) // Code expires after 5 minutes
+            .build();
     private final CustomerRepository customerRepository;
     private final PasswordEncoder passwordEncoder;
     private final StaffRepository staffRepository;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
-
-    public AuthService(CustomerRepository customerRepository, PasswordEncoder passwordEncoder, StaffRepository staffRepository, AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
+    private final CustomerService customerService;
+    private final EmailService emailService;
+    public AuthService(CustomerRepository customerRepository, PasswordEncoder passwordEncoder, StaffRepository staffRepository, AuthenticationManager authenticationManager, JwtUtil jwtUtil, CustomerService customerService, EmailService emailService) {
         this.customerRepository = customerRepository;
         this.passwordEncoder = passwordEncoder;
         this.staffRepository = staffRepository;
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
+        this.customerService = customerService;
+        this.emailService = emailService;
     }
 
     @Override
@@ -93,8 +104,8 @@ public class AuthService implements IAuthService {
     }
 
     @Override
-    public boolean changePassword(Long userId, ChangePasswordRequestDTO dto) {
-        Customer user = customerRepository.findById(userId)
+    public boolean changePassword(ChangePasswordRequestDTO dto) {
+        Customer user = customerRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         Preconditions.checkState(dto.getOldPassword().strip().equals(dto.getOldPassword()), "Password must not contain spaces");
         Preconditions.checkState(dto.getNewPassword().strip().equals(dto.getNewPassword()), "Password must not contain spaces");
@@ -111,5 +122,23 @@ public class AuthService implements IAuthService {
         return true;
     }
 
+    @Override
+    public boolean requestResetPassword(String email) {
+        Customer account = customerRepository.findByEmail(email).orElseThrow(
+                () -> new IllegalArgumentException("Account not found with email:" + email)
+        );
+        if(account == null){
+            return false;
+        }
+        String verificationCode = String.valueOf(new Random().nextInt(900000)+100000);
+        codeStorage.put(account.getEmail(),verificationCode);
+        emailService.sendVeificationCode(email,verificationCode);
+        return true;
+    }
+
+    @Override
+    public boolean validateCode(String email, String code) {
+        return code.equals(codeStorage.get(email));
+    }
 
 }
