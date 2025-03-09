@@ -1,6 +1,8 @@
 package com.net1707.backend.service;
 
 import com.net1707.backend.dto.request.EmailRequest;
+import com.net1707.backend.model.Customer;
+import com.net1707.backend.repository.CustomerRepository;
 import com.net1707.backend.service.Interface.IEmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -15,16 +17,22 @@ import java.io.File;
 
 @Service
 public class EmailService implements IEmailService {
+    private final CustomerRepository customerRepository;
+
     @Autowired
     private JavaMailSender emailSender;
+
+    public EmailService(CustomerRepository customerRepository) {
+        this.customerRepository = customerRepository;
+    }
 
     @Override
     public void sendSimpleMessage(EmailRequest request) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("matlovedx96@gmail.com");
         message.setTo(request.getTo());
-        message.setSubject(request.getSubject());
-        message.setText(request.getText());
+        message.setSubject("Password set verification code");
+        message.setText("Your verification code is:" + request.getCode());
         emailSender.send(message);
     }
 
@@ -61,6 +69,17 @@ public class EmailService implements IEmailService {
         } catch (MessagingException e) {
             e.getCause();
         }
+        emailSender.send(message);
+    }
+
+    @Override
+    public void sendVeificationCode(String email, String code) {
+        Customer customer = customerRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("Send verification code error"));
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("matlovedx96@gmail.com");
+        message.setTo(customer.getEmail());
+        message.setSubject("Password set verification code");
+        message.setText("Your verification code is:" + code + "This code expire in 5 minutes");
         emailSender.send(message);
     }
 

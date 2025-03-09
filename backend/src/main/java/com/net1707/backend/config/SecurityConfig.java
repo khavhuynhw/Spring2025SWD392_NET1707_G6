@@ -49,7 +49,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**" // Cho phép OpenAPI truy cập
                         ).permitAll() // ✅ Đảm bảo login API được phép truy cập
                         .requestMatchers("/customer/**").hasRole("CUSTOMER")
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)) // use session
                 .formLogin(form -> form.disable()) // ✅ off form login Spring Security

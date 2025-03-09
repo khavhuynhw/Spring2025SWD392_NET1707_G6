@@ -6,4 +6,6 @@ public interface IEmailService {
     void sendSimpleMessage(EmailRequest request);
     void sendHtmlMessage(EmailRequest request);
     void sendMessageWithAttachment(String to, String subject, String text, String attachmentPath);
+     void sendVeificationCode(String email,String code);
+
 }

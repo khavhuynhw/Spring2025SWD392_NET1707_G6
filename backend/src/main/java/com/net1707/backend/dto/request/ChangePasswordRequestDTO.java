@@ -11,4 +11,5 @@ public class ChangePasswordRequestDTO {
     private String oldPassword;
     private String newPassword;
     private String confirmPassword;
+    private String email;
 }
