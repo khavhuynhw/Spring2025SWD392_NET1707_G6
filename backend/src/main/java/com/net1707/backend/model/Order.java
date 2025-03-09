@@ -42,7 +42,7 @@ public class Order {
     private Promotion promotion;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "staff_id")
+    @JoinColumn(name = "staff_id", nullable = true)
     private Staff staff;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
