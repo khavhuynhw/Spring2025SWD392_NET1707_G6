@@ -49,7 +49,7 @@ public class ProductBatchController {
     public ResponseEntity<?> deleteBatch(@PathVariable Long batchId) {
         try {
             productBatchService.deleteBatch(batchId);
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.ok().build();
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
