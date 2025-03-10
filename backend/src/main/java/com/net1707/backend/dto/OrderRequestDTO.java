@@ -11,4 +11,5 @@ public class OrderRequestDTO {
     private LocalDate orderDate;
     private Long promotionId;
     private List<OrderDetailRequestDTO> orderDetails;
+    private String address;
 }

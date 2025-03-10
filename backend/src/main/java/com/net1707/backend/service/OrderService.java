@@ -29,6 +29,7 @@ public class OrderService implements IOrderService {
     private final OrderMapper orderMapper;
     private final OrderDetailMapper orderDetailMapper;
     private final IVNPayService vnPayService;
+    private final PaymentRepository paymentRepository;
 
     @Override
     public List<OrderDTO> getAllOrders() {
@@ -60,8 +61,6 @@ public class OrderService implements IOrderService {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
-
-
         Promotion promotion = null;
         if (orderRequestDTO.getPromotionId() != null) {
             promotion = promotionRepository.findById(orderRequestDTO.getPromotionId())
@@ -78,6 +77,7 @@ public class OrderService implements IOrderService {
         order.setCustomer(customer);
         order.setStaff(null);
         order.setPromotion(promotion);
+        order.setAddress(orderRequestDTO.getAddress());
 
         List<OrderDetail> orderDetails = new ArrayList<>();
         BigDecimal totalAmount = BigDecimal.ZERO;
@@ -192,6 +192,16 @@ public class OrderService implements IOrderService {
             }
 
             orderRepository.save(order);
+
+            Payment payment = Payment.builder()
+                    .order(order)
+                    .paymentMethod("VNPay")
+                    .amount(new BigDecimal(params.get("amount")))
+                    .paymentDate(new Date())
+                    .paymentStatus(Payment.PaymentStatus.ACCEPTED)
+                    .build();
+            paymentRepository.save(payment);
+
             response.put("status", "success");
             response.put("message", "Payment successful, order updated!");
         } else {
