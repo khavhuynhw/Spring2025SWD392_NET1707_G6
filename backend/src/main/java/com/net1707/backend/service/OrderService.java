@@ -234,6 +234,24 @@ public class OrderService implements IOrderService {
     }
 
     @Override
+    @Transactional
+    public Map<String, String> updateOrderStatus(Long orderId, Order.OrderStatus newStatus) {
+        Map<String, String> response = new HashMap<>();
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        // Update new order status
+        order.setStatus(newStatus);
+        orderRepository.save(order);
+
+        response.put("status", "success");
+        response.put("message", "Order status updated successfully!");
+        return response;
+    }
+
+
+    @Override
     public OrderDTO updateDeliveryStatus(OrderDeliveryRequestDTO requestDTO) {
         Order order = orderRepository.findById(requestDTO.getOrderId())
                 .orElseThrow(() -> new RuntimeException("Order not found"));
