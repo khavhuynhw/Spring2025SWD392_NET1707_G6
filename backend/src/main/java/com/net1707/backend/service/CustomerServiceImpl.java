@@ -5,6 +5,7 @@ import com.net1707.backend.model.Order;
 import com.net1707.backend.model.QuizResult;
 import com.net1707.backend.model.Review;
 import com.net1707.backend.repository.CustomerRepository;
+import com.net1707.backend.repository.OrderRepository;
 import com.net1707.backend.service.Interface.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,9 +19,11 @@ import java.util.Optional;
 public class CustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final OrderRepository orderRepository;
     @Autowired
-    public CustomerServiceImpl(CustomerRepository customerRepository) {
+    public CustomerServiceImpl(CustomerRepository customerRepository, OrderRepository orderRepository) {
         this.customerRepository = customerRepository;
+        this.orderRepository = orderRepository;
     }
 
     @Override

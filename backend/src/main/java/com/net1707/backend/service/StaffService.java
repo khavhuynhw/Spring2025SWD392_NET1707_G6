@@ -97,7 +97,7 @@ public class StaffService implements IStaffService {
         Staff existingStaff = staffRepository.findById(staffId)
                 .orElseThrow(() -> new ResourceNotFoundException("Staff not found with id: " + staffId));
 
-        existingStaff.setFullname(staffDto.getFullname());
+        existingStaff.setFullName(staffDto.getFullname());
         existingStaff.setEmail(staffDto.getEmail());
         existingStaff.setPhone(staffDto.getPhone());
         existingStaff.setRole(staffDto.getRole());
@@ -149,5 +149,7 @@ public class StaffService implements IStaffService {
                 .map(staffMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+
 
 }

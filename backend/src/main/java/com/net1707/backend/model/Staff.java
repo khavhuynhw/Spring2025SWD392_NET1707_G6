@@ -17,7 +17,7 @@ public class Staff {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long staffId;
 
-    private String fullname;
+    private String fullName;
     private String email;
     private String phone;
     @Enumerated(EnumType.STRING)

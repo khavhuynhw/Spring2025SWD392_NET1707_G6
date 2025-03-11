@@ -1,6 +1,7 @@
 package com.net1707.backend.service;
 
 import com.net1707.backend.dto.*;
+import com.net1707.backend.dto.request.OrderDeliveryRequestDTO;
 import com.net1707.backend.mapper.OrderDetailMapper;
 import com.net1707.backend.mapper.OrderMapper;
 import com.net1707.backend.model.*;
@@ -29,6 +30,7 @@ public class OrderService implements IOrderService {
     private final OrderMapper orderMapper;
     private final OrderDetailMapper orderDetailMapper;
     private final IVNPayService vnPayService;
+
 
     @Override
     public List<OrderDTO> getAllOrders() {
@@ -222,9 +224,25 @@ public class OrderService implements IOrderService {
                 .collect(Collectors.toList());
     }
 
-
-
-
+    @Override
+    public OrderDTO updateDeliveryStatus(OrderDeliveryRequestDTO requestDTO) {
+        Order order = orderRepository.findById(requestDTO.getOrderId())
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+        Staff staff = staffRepository.findById(requestDTO.getDeliveryStaffId())
+                .orElseThrow(() -> new RuntimeException("Staff not found"));
+        if (order.getStatus() == Order.OrderStatus.PAID) {
+            throw new IllegalStateException("Order is not in deliverable state");
+        }
+       if (requestDTO.getDeliveryStatus().compareToIgnoreCase(Order.OrderStatus.DELIVERED.name()) == -1){
+           order.setStatus(Order.OrderStatus.REFUNDED);
+       }
+       order.setStatus(Order.OrderStatus.DELIVERED);
+        if (staff.getRole() == Role.DELIVERY_STAFF){
+            order.setStaff(staff);
+        }
+        orderRepository.save(order);
+        return orderMapper.toDto(order);
+    }
 
 
 }
