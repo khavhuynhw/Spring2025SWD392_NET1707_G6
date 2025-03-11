@@ -3,6 +3,7 @@ package com.net1707.backend.service.Interface;
 import com.net1707.backend.dto.OrderDTO;
 import com.net1707.backend.dto.OrderRequestDTO;
 import com.net1707.backend.dto.request.OrderDeliveryRequestDTO;
+import com.net1707.backend.model.Order;
 import jakarta.servlet.http.HttpServletRequest;
 
 
@@ -19,6 +20,6 @@ public interface IOrderService {
     String createOrder(OrderRequestDTO orderRequestDTO, HttpServletRequest request,Long customerId);
     Map<String, String> handlePaymentCallback(Map<String, String> params);
     List<OrderDTO> getOrdersByCustomer(Long customerId);
-
+    Map<String, String> updateOrderStatus(Long orderId, Order.OrderStatus newStatus);
     OrderDTO updateDeliveryStatus(OrderDeliveryRequestDTO requestDTO);
 }
