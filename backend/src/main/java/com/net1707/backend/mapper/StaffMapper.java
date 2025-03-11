@@ -14,7 +14,7 @@ public class StaffMapper extends BaseMapper<StaffDTO, Staff> {
         }
         return StaffDTO.builder()
                 .staffId(entity.getStaffId())
-                .fullname(entity.getFullname())
+                .fullname(entity.getFullName())
                 .email(entity.getEmail())
                 .phone(entity.getPhone())
                 .password(entity.getPassword() != null ? entity.getPassword() : null)
@@ -29,7 +29,7 @@ public class StaffMapper extends BaseMapper<StaffDTO, Staff> {
         }
         return Staff.builder()
                 .staffId(dto.getStaffId())
-                .fullname(dto.getFullname())
+                .fullName(dto.getFullname())
                 .email(dto.getEmail())
                 .phone(dto.getPhone())
                 .password(dto.getPassword() != null ? dto.getPassword() : null)

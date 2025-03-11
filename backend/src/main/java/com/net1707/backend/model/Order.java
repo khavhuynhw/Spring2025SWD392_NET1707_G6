@@ -30,11 +30,18 @@ public class Order {
         SHIPPED,
         DELIVERED,
         PAID,
-        CANCELLED
+        CANCELLED,
+        RETURNED,
+        REFUNDED
     }
+
+
+    @OneToOne(mappedBy = "order",cascade = CascadeType.ALL)
+    private Refund refund;
 
     @Column(nullable = false, length = 500)
     private String address;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id")

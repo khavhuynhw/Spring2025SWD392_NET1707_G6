@@ -74,7 +74,7 @@ public class AuthService implements IAuthService {
 
         // Create Staff
         Staff staff = new Staff();
-        staff.setFullname(staffRegisterDTO.getFullname());
+        staff.setFullName(staffRegisterDTO.getFullname());
         staff.setEmail(staffRegisterDTO.getEmail());
         staff.setPhone(staffRegisterDTO.getPhone());
         staff.setRole(staffRegisterDTO.getRole()); // Use Role Enum

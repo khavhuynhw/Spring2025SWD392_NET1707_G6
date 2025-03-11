@@ -4,5 +4,6 @@ public enum Role {
     CUSTOMER_STAFF,
     ORDER_STAFF,
     ADMIN,
-    MANAGER
+    MANAGER,
+    DELIVERY_STAFF
 }

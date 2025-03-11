@@ -3,6 +3,8 @@ package com.net1707.backend.controller;
 import com.net1707.backend.dto.OrderDTO;
 import com.net1707.backend.dto.OrderDetailDTO;
 import com.net1707.backend.dto.OrderRequestDTO;
+import com.net1707.backend.dto.request.DeliveryStatusUpdateRequest;
+import com.net1707.backend.dto.request.OrderDeliveryRequestDTO;
 import com.net1707.backend.security.UserDetailsImpl;
 import com.net1707.backend.service.Interface.IOrderService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -68,5 +70,11 @@ public class OrderController {
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<List<OrderDTO>> getOrdersByCustomer(@PathVariable Long customerId) {
         return ResponseEntity.ok(orderService.getOrdersByCustomer(customerId));
+    }
+
+    @PutMapping("/{orderId}/staff")
+    public ResponseEntity<OrderDTO> updateDeliveryStatus(@RequestBody OrderDeliveryRequestDTO requestDTO) {
+        OrderDTO orderDTO = orderService.updateDeliveryStatus(requestDTO);
+        return ResponseEntity.ok(orderDTO);
     }
 }

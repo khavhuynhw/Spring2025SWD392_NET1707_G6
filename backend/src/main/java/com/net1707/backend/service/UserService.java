@@ -39,7 +39,7 @@ public class UserService implements IUserService {
     public Staff updateStaff(String email, UpdateInfoUserDTO updatedStaff) {
         return staffRepository.findByEmail(email).map(staff -> {
             if (updatedStaff.getFullName() != null) {
-                staff.setFullname(updatedStaff.getFullName());
+                staff.setFullName(updatedStaff.getFullName());
             }
             if (updatedStaff.getPhone() != null) {
                 staff.setPhone(updatedStaff.getPhone());
