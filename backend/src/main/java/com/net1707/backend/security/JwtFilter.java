@@ -26,7 +26,7 @@ public class JwtFilter extends OncePerRequestFilter {
     @Autowired
     private UserDetailsService userDetailsService;
 
-    private static final Set<String> PUBLIC_ENDPOINTS = Set.of("/auth/login", "/products", "/products/{id}","/api/payment/return");
+    private static final Set<String> PUBLIC_ENDPOINTS = Set.of("/auth/login", "/products", "/products/{id}","/payment/return");
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)

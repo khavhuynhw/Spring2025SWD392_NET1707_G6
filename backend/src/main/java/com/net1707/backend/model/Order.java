@@ -35,8 +35,13 @@ public class Order {
         REFUNDED
     }
 
+
     @OneToOne(mappedBy = "order",cascade = CascadeType.ALL)
     private Refund refund;
+
+    @Column(nullable = false, length = 500)
+    private String address;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id")
@@ -47,7 +52,7 @@ public class Order {
     private Promotion promotion;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "staff_id")
+    @JoinColumn(name = "staff_id", nullable = true)
     private Staff staff;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)

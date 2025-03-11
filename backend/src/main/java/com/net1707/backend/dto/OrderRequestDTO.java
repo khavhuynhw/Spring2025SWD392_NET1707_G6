@@ -9,9 +9,7 @@ import java.util.List;
 @Builder
 public class OrderRequestDTO {
     private LocalDate orderDate;
-    private String status;
-    private Long customerId;
     private Long promotionId;
-    private Long staffId;
     private List<OrderDetailRequestDTO> orderDetails;
+    private String address;
 }

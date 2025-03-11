@@ -16,7 +16,7 @@ public interface IOrderService {
     OrderDTO updateOrder(Long orderId, OrderDTO orderDTO);
     void deleteOrder(Long orderId);
 //    String handlePaymentCallback(Map<String, String> params);
-    String createOrder(OrderRequestDTO orderRequestDTO, HttpServletRequest request);
+    String createOrder(OrderRequestDTO orderRequestDTO, HttpServletRequest request,Long customerId);
     Map<String, String> handlePaymentCallback(Map<String, String> params);
     List<OrderDTO> getOrdersByCustomer(Long customerId);
 

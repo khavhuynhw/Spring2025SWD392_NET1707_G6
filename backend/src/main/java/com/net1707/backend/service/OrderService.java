@@ -30,6 +30,7 @@ public class OrderService implements IOrderService {
     private final OrderMapper orderMapper;
     private final OrderDetailMapper orderDetailMapper;
     private final IVNPayService vnPayService;
+    private final PaymentRepository paymentRepository;
 
 
     @Override
@@ -58,12 +59,9 @@ public class OrderService implements IOrderService {
 
     @Override
     @Transactional
-    public String createOrder(OrderRequestDTO orderRequestDTO, HttpServletRequest request) {
-        Customer customer = customerRepository.findById(orderRequestDTO.getCustomerId())
+    public String createOrder(OrderRequestDTO orderRequestDTO, HttpServletRequest request,Long customerId) {
+        Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
-
-        Staff staff = staffRepository.findById(orderRequestDTO.getStaffId())
-                .orElseThrow(() -> new RuntimeException("Staff not found"));
 
         Promotion promotion = null;
         if (orderRequestDTO.getPromotionId() != null) {
@@ -79,8 +77,9 @@ public class OrderService implements IOrderService {
         order.setOrderDate(orderRequestDTO.getOrderDate());
         order.setStatus(Order.OrderStatus.PENDING);
         order.setCustomer(customer);
-        order.setStaff(staff);
+        order.setStaff(null);
         order.setPromotion(promotion);
+        order.setAddress(orderRequestDTO.getAddress());
 
         List<OrderDetail> orderDetails = new ArrayList<>();
         BigDecimal totalAmount = BigDecimal.ZERO;
@@ -195,6 +194,16 @@ public class OrderService implements IOrderService {
             }
 
             orderRepository.save(order);
+
+            Payment payment = Payment.builder()
+                    .order(order)
+                    .paymentMethod("VNPay")
+                    .amount(new BigDecimal(params.get("amount")))
+                    .paymentDate(new Date())
+                    .paymentStatus(Payment.PaymentStatus.ACCEPTED)
+                    .build();
+            paymentRepository.save(payment);
+
             response.put("status", "success");
             response.put("message", "Payment successful, order updated!");
         } else {

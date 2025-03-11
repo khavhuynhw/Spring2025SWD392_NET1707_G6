@@ -16,6 +16,7 @@ public class OrderDTO {
     private LocalDate orderDate;
     private BigDecimal totalAmount;
     private OrderStatus status;
+    private String address;
     private Long customerId;
     private Long promotionId;
     private Long staffId;
