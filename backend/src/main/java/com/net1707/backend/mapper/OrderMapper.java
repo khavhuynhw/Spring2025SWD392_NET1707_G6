@@ -33,6 +33,8 @@ public class OrderMapper extends BaseMapper<OrderDTO, Order> {
                 .orderDate(entity.getOrderDate())
                 .totalAmount(entity.getTotalAmount())
                 .status(entity.getStatus())
+                .address(entity.getAddress())
+                .paymentUrl(entity.getPaymentUrl())
                 .customerId(entity.getCustomer() != null ? entity.getCustomer().getCustomerId() : null)
                 .promotionId(entity.getPromotion() != null ? entity.getPromotion().getPromotionId() : null)
                 .staffId(entity.getStaff() != null ? entity.getStaff().getStaffId() : null)
@@ -52,6 +54,8 @@ public class OrderMapper extends BaseMapper<OrderDTO, Order> {
                 .orderDate(dto.getOrderDate())
                 .totalAmount(dto.getTotalAmount())
                 .status(dto.getStatus())
+                .address(dto.getAddress())
+                .paymentUrl(dto.getPaymentUrl())
                 .build();
 
 

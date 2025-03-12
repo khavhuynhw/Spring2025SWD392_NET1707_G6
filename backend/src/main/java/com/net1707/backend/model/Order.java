@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -42,6 +43,9 @@ public class Order {
     @Column(nullable = false, length = 500)
     private String address;
 
+    @Lob  // save by TEXT in database
+    @Column(nullable = true, columnDefinition = "TEXT")
+    private String paymentUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id")
@@ -60,4 +64,6 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Payment> payments;
+
+    private LocalDateTime createdAt = LocalDateTime.now();
 }

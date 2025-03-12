@@ -71,21 +71,25 @@ public class VNPayService implements IVNPayService {
         params.remove("vnp_SecureHash");
 
         boolean isValidSignature = VNPayUtils.isValidSignature(params, secureHash, vnpayConfig.getVnp_HashSecret());
+        String responseCode = params.get("vnp_ResponseCode");
 
         Map<String, String> response = new HashMap<>();
-        response.put("status", isValidSignature ? "success" : "failed");
-        response.put("message", isValidSignature ? "Payment verified successfully" : "Invalid signature");
 
-        //
-        if (isValidSignature) {
+        if (isValidSignature && "00".equals(responseCode)) {
+            response.put("status", "success");
+            response.put("message", "Payment verified successfully");
             response.put("amount", params.get("vnp_Amount"));
             response.put("orderId", params.get("vnp_OrderInfo"));
         } else {
+            response.put("status", "failed");
+            response.put("message", isValidSignature ? "Payment failed" : "Invalid signature");
             response.put("amount", null);
             response.put("orderId", null);
         }
+
         return response;
     }
+
 
 
 }
