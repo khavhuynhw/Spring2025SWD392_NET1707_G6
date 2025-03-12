@@ -125,12 +125,14 @@ public class OrderService implements IOrderService {
             BigDecimal discount = totalAmount.multiply(promotion.getDiscountPercentage().divide(BigDecimal.valueOf(100)));
             totalAmount = totalAmount.subtract(discount);
         }
+        totalAmount = totalAmount.multiply(BigDecimal.valueOf(25000));
 
         order.setTotalAmount(totalAmount);
         order.setOrderDetails(orderDetails);
         Order savedOrder = orderRepository.save(order);
-
-        return vnPayService.createPaymentUrl(request, savedOrder.getOrderId(), savedOrder.getTotalAmount());
+        String paymentUrl = vnPayService.createPaymentUrl(request, savedOrder.getOrderId(), savedOrder.getTotalAmount());
+        order.setPaymentUrl(paymentUrl);
+        return paymentUrl;
     }
 
 

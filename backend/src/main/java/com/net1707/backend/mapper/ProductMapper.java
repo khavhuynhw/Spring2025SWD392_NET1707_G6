@@ -32,15 +32,16 @@ public class ProductMapper extends BaseMapper<ProductDTO, Product> {
                 .description(dto.getDescription())
                 .price(dto.getPrice())
                 .category(dto.getCategory())
-                .suitableSkinTypes(dto.getSuitableSkinTypes() != null ?
-                        dto.getSuitableSkinTypes().stream().map(SkinType::valueOf).collect(Collectors.toSet()) : null)
-                .targetsConcerns(dto.getTargetsConcerns() != null ?
-                        dto.getTargetsConcerns().stream().map(SkinConcern::valueOf).collect(Collectors.toSet()) : null)
-                .suitableForSensitiveSkin(dto.getSuitableForSensitiveSkin())
-                .minimumAgeRecommended(dto.getMinimumAgeRecommended())
-                .maximumAgeRecommended(dto.getMaximumAgeRecommended())
-                .suitableClimateZones(dto.getSuitableClimateZones())
-                .stockQuantity(dto.getStockQuantity())
+                .skinTypeCompatibility(dto.getSkinTypeCompatibility())
+//                .suitableSkinTypes(dto.getSuitableSkinTypes() != null ?
+//                        dto.getSuitableSkinTypes().stream().map(SkinType::valueOf).collect(Collectors.toSet()) : null)
+//                .targetsConcerns(dto.getTargetsConcerns() != null ?
+//                        dto.getTargetsConcerns().stream().map(SkinConcern::valueOf).collect(Collectors.toSet()) : null)
+//                .suitableForSensitiveSkin(dto.getSuitableForSensitiveSkin())
+//                .minimumAgeRecommended(dto.getMinimumAgeRecommended())
+//                .maximumAgeRecommended(dto.getMaximumAgeRecommended())
+//                .suitableClimateZones(dto.getSuitableClimateZones())
+//                .stockQuantity(dto.getStockQuantity())
                 .imageURL(dto.getImageURL())
                 .build();
     }

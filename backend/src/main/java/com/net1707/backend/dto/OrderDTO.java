@@ -21,4 +21,5 @@ public class OrderDTO {
     private Long promotionId;
     private Long staffId;
     private List<OrderDetailDTO> orderDetails;
+    private String paymentUrl;
 }
