@@ -38,7 +38,7 @@ public class Refund {
     private LocalDateTime refundCompletionTime;
 
     @ManyToOne
-    @JoinColumn(name = "verified_by_employee_id")
+    @JoinColumn(name = "staff_id")
     private Staff verifiedByEmployee;
 
     private String proofDocumentUrl;
