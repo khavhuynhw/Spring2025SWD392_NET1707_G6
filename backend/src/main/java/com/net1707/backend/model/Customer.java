@@ -1,6 +1,7 @@
 package com.net1707.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,7 +30,7 @@ public class Customer {
     @Column(nullable = false)
     private String address;
 
-    @Column(nullable = false)
+    @Nullable
     private String password;
 
     private Integer ageRange;

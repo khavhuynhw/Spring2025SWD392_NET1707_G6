@@ -1,5 +1,6 @@
 package com.net1707.backend.service.Interface;
 
+import com.net1707.backend.dto.CustomerDTO;
 import com.net1707.backend.model.Customer;
 import com.net1707.backend.model.Order;
 import com.net1707.backend.model.QuizResult;
@@ -16,7 +17,7 @@ public interface CustomerService {
     Page<Customer> getAllCustomers(Pageable pageable);
     Optional<Customer> getCustomerByEmail(String email);
     Optional<Customer> getCustomerByPhone(String phone);
-    Customer updateCustomer(Customer customerDetails);
+    Customer updateCustomer(CustomerDTO dto);
     void deleteCustomer(Long customerId);
     List<Order> getCustomerOrders(Long customerId);
     List<Review> getCustomerReviews(Long customerId);
