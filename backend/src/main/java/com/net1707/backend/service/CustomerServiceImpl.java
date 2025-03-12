@@ -1,5 +1,6 @@
 package com.net1707.backend.service;
 
+import com.net1707.backend.dto.CustomerDTO;
 import com.net1707.backend.model.Customer;
 import com.net1707.backend.model.Order;
 import com.net1707.backend.model.QuizResult;
@@ -58,11 +59,34 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Customer updateCustomer(Customer customerDetails) {
-       if (customerDetails.getCustomerId() == null){
-           throw new IllegalArgumentException("Account does not exist");
-       }
-       return customerRepository.save(customerDetails);
+    public Customer updateCustomer(CustomerDTO dto) {
+         Customer customer = customerRepository.findById(dto.getCustomerId())
+                .orElseThrow(() -> new IllegalArgumentException("Account does not exist"));
+        if (dto.getFullName() != null && !dto.getFullName().isEmpty()) {
+            customer.setFullName(dto.getFullName());
+        }
+        if (dto.getPhone() != null && !dto.getPhone().isEmpty()) {
+            customer.setPhone(dto.getPhone());
+        }
+        if (dto.getAddress() != null && !dto.getAddress().isEmpty()) {
+            customer.setAddress(dto.getAddress());
+        }
+        if (dto.getAgeRange() != null) {
+            customer.setAgeRange(dto.getAgeRange());
+        }
+        if (dto.getPrimarySkinType() != null) {
+            customer.setPrimarySkinType(dto.getPrimarySkinType());
+        }
+        if (dto.getSkinConcerns() != null && !dto.getSkinConcerns().isEmpty()) {
+            customer.setSkinConcerns(dto.getSkinConcerns());
+        }
+        if (dto.getIsSensitive() != null) {
+            customer.setIsSensitive(dto.getIsSensitive());
+        }
+        if (dto.getClimateZone() != null && !dto.getClimateZone().isEmpty()) {
+            customer.setClimateZone(dto.getClimateZone());
+        }
+       return customerRepository.save(customer);
     }
 
     @Override

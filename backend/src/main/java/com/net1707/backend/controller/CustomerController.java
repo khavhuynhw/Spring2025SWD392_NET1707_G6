@@ -75,8 +75,7 @@ public class CustomerController {
     // Update a customer
     @PostMapping("/update")
     public ResponseEntity<CustomerDTO> updateCustomer(@RequestBody CustomerDTO customerDTO) {
-        Customer customer = customerMapper.toEntity(customerDTO);
-        Customer updatedCustomer = customerService.updateCustomer(customer);
+        Customer updatedCustomer = customerService.updateCustomer(customerDTO);
         CustomerDTO updatedCustomerDTO = customerMapper.toDto(updatedCustomer);
         return new ResponseEntity<>(updatedCustomerDTO, HttpStatus.OK);
     }
