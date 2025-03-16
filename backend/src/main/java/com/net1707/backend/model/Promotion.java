@@ -24,7 +24,7 @@ public class Promotion {
     private BigDecimal discountPercentage;
     private String startDate;
     private String endDate;
-
+    private BigDecimal minimumAmount;
     @OneToMany(mappedBy = "promotion", cascade = CascadeType.ALL)
     private List<Order> orders;
 }

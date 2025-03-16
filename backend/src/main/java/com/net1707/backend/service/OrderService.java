@@ -83,6 +83,7 @@ public class OrderService implements IOrderService {
 
         List<OrderDetail> orderDetails = new ArrayList<>();
         BigDecimal totalAmount = BigDecimal.ZERO;
+        List<ProductBatch> updatedBatches = new ArrayList<>();
 
         for (OrderDetailRequestDTO detailRequest : orderRequestDTO.getOrderDetails()) {
             Product product = productRepository.findById(detailRequest.getProductId())
@@ -107,6 +108,8 @@ public class OrderService implements IOrderService {
             if (selectedBatch == null) {
                 throw new RuntimeException("No available batch for product ID: " + product.getProductID());
             }
+            selectedBatch.setQuantity(selectedBatch.getQuantity() - detailRequest.getQuantity());
+            updatedBatches.add(selectedBatch);
 
             BigDecimal unitPrice = product.getPrice().multiply(BigDecimal.valueOf(detailRequest.getQuantity()));
 
@@ -120,17 +123,20 @@ public class OrderService implements IOrderService {
 
             totalAmount = totalAmount.add(unitPrice);
         }
+        productBatchRepository.saveAll(updatedBatches);
+
 
         if (promotion != null && promotion.getDiscountPercentage() != null) {
             BigDecimal discount = totalAmount.multiply(promotion.getDiscountPercentage().divide(BigDecimal.valueOf(100)));
             totalAmount = totalAmount.subtract(discount);
         }
-        totalAmount = totalAmount.multiply(BigDecimal.valueOf(25000));
+
 
         order.setTotalAmount(totalAmount);
         order.setOrderDetails(orderDetails);
         Order savedOrder = orderRepository.save(order);
-        String paymentUrl = vnPayService.createPaymentUrl(request, savedOrder.getOrderId(), savedOrder.getTotalAmount());
+        totalAmount = totalAmount.multiply(BigDecimal.valueOf(25000));
+        String paymentUrl = vnPayService.createPaymentUrl(request, savedOrder.getOrderId(), totalAmount);
         order.setPaymentUrl(paymentUrl);
         return paymentUrl;
     }
@@ -194,13 +200,13 @@ public class OrderService implements IOrderService {
                 batch.setQuantity(batch.getQuantity() - detail.getQuantity());
                 productBatchRepository.save(batch);
             }
-
+            order.setPaymentUrl(null);
             orderRepository.save(order);
 
             Payment payment = Payment.builder()
                     .order(order)
                     .paymentMethod("VNPay")
-                    .amount(new BigDecimal(params.get("amount")))
+                    .amount(order.getTotalAmount())
                     .paymentDate(new Date())
                     .paymentStatus(Payment.PaymentStatus.ACCEPTED)
                     .build();

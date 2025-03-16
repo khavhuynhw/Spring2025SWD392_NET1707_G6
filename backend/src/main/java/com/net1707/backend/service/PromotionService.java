@@ -38,9 +38,11 @@ public class PromotionService implements IPromotionService {
                 .promotionName(promotionDTO.getPromotionName())
                 .description(promotionDTO.getDescription())
                 .discountPercentage(promotionDTO.getDiscountPercentage())
+                .minimumAmount(promotionDTO.getMinimumAmount())
                 .startDate(promotionDTO.getStartDate())
                 .endDate(promotionDTO.getEndDate())
                 .build();
+
 
         return promotionMapper.toDto(promotionRepository.save(promotion));
     }
@@ -53,6 +55,7 @@ public class PromotionService implements IPromotionService {
         promotion.setPromotionName(promotionDTO.getPromotionName());
         promotion.setDescription(promotionDTO.getDescription());
         promotion.setDiscountPercentage(promotionDTO.getDiscountPercentage());
+        promotion.setMinimumAmount(promotionDTO.getMinimumAmount());
         promotion.setStartDate(promotionDTO.getStartDate());
         promotion.setEndDate(promotionDTO.getEndDate());
 

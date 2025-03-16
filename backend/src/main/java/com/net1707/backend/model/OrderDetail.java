@@ -30,6 +30,9 @@ public class OrderDetail {
     @JoinColumn(name = "batchId", nullable = false)
     private ProductBatch productBatch;
 
+    @OneToOne(mappedBy = "orderDetail", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Review review;
+
     @Column(nullable = false)
     private Integer quantity;
 

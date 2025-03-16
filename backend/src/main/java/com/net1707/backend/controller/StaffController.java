@@ -30,10 +30,16 @@ public class StaffController {
         this.iUserService = iUserService;
         this.staffService = staffService;
     }
-
     @PutMapping("/update")
     public ResponseEntity<Staff> updateStaff(@RequestParam String email, @RequestBody UpdateInfoUserDTO updatedStaff) {
         return ResponseEntity.ok(iUserService.updateStaff(email, updatedStaff));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<StaffDTO> updateStaff(@PathVariable("id") Long id,
+                                                @Valid @RequestBody StaffDTO staffDTO) {
+        StaffDTO updatedStaff = staffService.updateStaff(id, staffDTO);
+        return ResponseEntity.ok(updatedStaff);
     }
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping

@@ -93,12 +93,11 @@ public class StaffService implements IStaffService {
     @Transactional
     public StaffDTO updateStaff(Long staffId, StaffDTO staffDto) {
         logger.info("Updating staff member with ID: {}", staffId);
-
+        System.out.println("Updating staff member with ID: " + staffId);
         Staff existingStaff = staffRepository.findById(staffId)
                 .orElseThrow(() -> new ResourceNotFoundException("Staff not found with id: " + staffId));
 
         existingStaff.setFullName(staffDto.getFullname());
-        existingStaff.setEmail(staffDto.getEmail());
         existingStaff.setPhone(staffDto.getPhone());
         existingStaff.setRole(staffDto.getRole());
 
