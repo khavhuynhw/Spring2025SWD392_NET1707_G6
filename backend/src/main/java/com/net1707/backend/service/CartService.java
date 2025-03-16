@@ -1,11 +1,18 @@
 package com.net1707.backend.service;
 
 import com.net1707.backend.dto.CartItemDTO;
+import com.net1707.backend.dto.ProductBatchDTO;
 import com.net1707.backend.dto.ProductDTO;
+import com.net1707.backend.mapper.ProductBatchMapper;
+import com.net1707.backend.model.Product;
+import com.net1707.backend.model.ProductBatch;
+import com.net1707.backend.repository.ProductBatchRepository;
+import com.net1707.backend.repository.ProductRepository;
 import com.net1707.backend.service.Interface.ICartService;
 import com.net1707.backend.service.Interface.IProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 
 
 import java.util.*;
@@ -16,6 +23,14 @@ public class CartService implements ICartService {
     @Autowired
     private IProductService iProductService;
 
+    @Autowired
+    private ProductBatchRepository productBatchRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
+    private ProductBatchMapper productBatchMapper;
 
     // get cart form userid
     private final Map<Long, List<CartItemDTO>> userCarts = new HashMap<>();
@@ -25,52 +40,92 @@ public class CartService implements ICartService {
         return userCarts.getOrDefault(userId, new ArrayList<>());
     }
 
-    // add product to cart
     public String addToCart(Long userId, CartItemDTO cartItem) {
-
-        //check userid if user null is not customer
         if (userId == null) {
             return "Only customers can have a cart";
         }
 
-        List<CartItemDTO> cart = userCarts.computeIfAbsent(userId, k -> new ArrayList<>());
-
-        // check product
-        if (cartItem.getProduct() == null) {
+        if (cartItem == null || cartItem.getProduct() == null) {
             return "Invalid product";
         }
 
-        ProductDTO product = cartItem.getProduct();
-
-        // check number quantity
         if (cartItem.getQuantity() <= 0) {
             return "Invalid quantity";
         }
 
-        // check if product exist in cart
+        ProductDTO product = cartItem.getProduct();
+        Product productEntity = productRepository.findById(product.getProductID())
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        List<CartItemDTO> cart = userCarts.computeIfAbsent(userId, k -> new ArrayList<>());
+
+        // get list batch has expired day
+        List<ProductBatch> batches = productBatchRepository.findByProduct(productEntity);
+        batches.sort(Comparator.comparing(ProductBatch::getExpireDate));
+
+        int availableStock = batches.stream().mapToInt(ProductBatch::getQuantity).sum();
+        if (cartItem.getQuantity() > availableStock) {
+            return "Not enough stock available";
+        }
+
+        // check product has exist in cart
         for (CartItemDTO item : cart) {
             if (item.getProduct().getProductID().equals(product.getProductID())) {
                 int newQuantity = item.getQuantity() + cartItem.getQuantity();
 
-                // check stock quantity
-                if (newQuantity > product.getStockQuantity()) {
-                    return "Not enough stock available";
+                // check batch before add quantity
+                if (newQuantity > availableStock) {
+                    return "Not enough stock for product " + product.getProductID();
                 }
 
+                // update quantity
                 item.setQuantity(newQuantity);
+
+                // update batch
+                List<ProductBatchDTO> updatedBatches = new ArrayList<>();
+                int remainingUpdateQuantity = newQuantity;
+
+                for (ProductBatch batch : batches) {
+                    if (remainingUpdateQuantity <= 0) break;
+
+                    int takeQuantity = Math.min(batch.getQuantity(), remainingUpdateQuantity);
+                    ProductBatchDTO batchDTO = productBatchMapper.toDto(batch);
+                    batchDTO.setQuantity(takeQuantity);
+                    updatedBatches.add(batchDTO);
+
+                    remainingUpdateQuantity -= takeQuantity;
+                }
+
+                // update list batch
+                item.setBatches(updatedBatches);
+
                 return "Product quantity updated in cart";
             }
         }
 
-        // check stock quantity
-        if (cartItem.getQuantity() > product.getStockQuantity()) {
-            return "Not enough stock available";
+        // if product does not exist in cart, add new
+        List<ProductBatchDTO> selectedBatches = new ArrayList<>();
+        int remainingQuantity = cartItem.getQuantity();
+
+        for (ProductBatch batch : batches) {
+            if (remainingQuantity <= 0) break;
+
+            int takeQuantity = Math.min(batch.getQuantity(), remainingQuantity);
+            ProductBatchDTO batchDTO = productBatchMapper.toDto(batch);
+            batchDTO.setQuantity(takeQuantity);
+            selectedBatches.add(batchDTO);
+
+            remainingQuantity -= takeQuantity;
         }
 
-        // add new product to cart
-        cart.add(new CartItemDTO(product, cartItem.getQuantity()));
+        // add product to cart but do not - quantity in batch
+        cart.add(new CartItemDTO(product, cartItem.getQuantity(), selectedBatches));
         return "Added to cart successfully";
     }
+
+
+
+
 
     // delete product from cart
     public String removeFromCart(Long userId, Long productId) {
@@ -93,7 +148,7 @@ public class CartService implements ICartService {
     }
 
 
-    //reduce quantity
+    //update quantity
     @Override
     public CartItemDTO updateQuantity(Long userId, Long productId, Integer quantity) {
         List<CartItemDTO> cart = userCarts.get(userId);
@@ -109,6 +164,30 @@ public class CartService implements ICartService {
                 }
                 if (quantity > 0) {
                     item.setQuantity(quantity); // update new quantity
+                    // get list batch has expired date
+                    Product productEntity = productRepository.findById(productId)
+                            .orElseThrow(() -> new RuntimeException("Product not found"));
+
+                    List<ProductBatch> batches = productBatchRepository.findByProduct(productEntity);
+                    batches.sort(Comparator.comparing(ProductBatch::getExpireDate));
+                    // update batch to new quantity
+                    List<ProductBatchDTO> updatedBatches = new ArrayList<>();
+                    int remainingQuantity = quantity;
+
+                    for (ProductBatch batch : batches) {
+                        if (remainingQuantity <= 0) break;
+
+                        int takeQuantity = Math.min(batch.getQuantity(), remainingQuantity);
+                        ProductBatchDTO batchDTO = productBatchMapper.toDto(batch);
+                        batchDTO.setQuantity(takeQuantity);
+                        updatedBatches.add(batchDTO);
+
+                        remainingQuantity -= takeQuantity;
+                    }
+
+                    // assign batch for cartItem
+                    item.setBatches(updatedBatches);
+
                     return item; // response cartItem update
                 }
             }

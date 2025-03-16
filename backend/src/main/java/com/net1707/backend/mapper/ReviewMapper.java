@@ -11,7 +11,7 @@ public class ReviewMapper extends BaseMapper<ReviewDTO, Review> {
         return ReviewDTO.builder()
                 .reviewId(entity.getReviewId())
                 .customerId(entity.getCustomer().getCustomerId())
-                .productId(entity.getProduct().getProductID())
+                .orderDetailId(entity.getOrderDetail().getOrderDetailId())
                 .rating(entity.getRating())
                 .comment(entity.getComment())
                 .build();

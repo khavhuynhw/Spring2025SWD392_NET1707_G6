@@ -33,7 +33,8 @@ public class Order {
         PAID,
         CANCELLED,
         RETURNED,
-        REFUNDED
+        REFUNDED,
+        COMPLETED
     }
 
 
@@ -66,4 +67,11 @@ public class Order {
     private List<Payment> payments;
 
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    private LocalDateTime updatedAt;
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }

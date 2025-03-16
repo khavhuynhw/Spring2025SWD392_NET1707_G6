@@ -13,6 +13,7 @@ public class PromotionMapper extends BaseMapper<PromotionDTO, Promotion>{
                 .promotionName(promotion.getPromotionName())
                 .description(promotion.getDescription())
                 .discountPercentage(promotion.getDiscountPercentage())
+                .minimumAmount(promotion.getMinimumAmount())
                 .startDate(promotion.getStartDate())
                 .endDate(promotion.getEndDate())
                 .build();
@@ -24,6 +25,7 @@ public class PromotionMapper extends BaseMapper<PromotionDTO, Promotion>{
                 .promotionName(dto.getPromotionName())
                 .description(dto.getDescription())
                 .discountPercentage(dto.getDiscountPercentage())
+                .minimumAmount(dto.getMinimumAmount())
                 .startDate(dto.getStartDate())
                 .endDate(dto.getEndDate())
                 .build();
