@@ -26,7 +26,13 @@ public class Refund {
     private RefundStatus status;
 
     public enum RefundStatus {
-        REQUESTED, PROCESSING, COMPLETED, VERIFIED, REJECTED
+        REQUESTED,
+        VERIFIED,
+        PICKED_UP,
+        RETURNED_TO_WAREHOUSE,
+        REFUNDED,
+        COMPLETED,
+        REJECTED
     }
 
     private BigDecimal amount;

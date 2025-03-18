@@ -2,7 +2,6 @@ package com.net1707.backend.mapper;
 
 import com.net1707.backend.dto.RefundDTO;
 import com.net1707.backend.dto.exception.ResourceNotFoundException;
-import com.net1707.backend.model.Order;
 import com.net1707.backend.model.Refund;
 import com.net1707.backend.model.Staff;
 import com.net1707.backend.repository.OrderRepository;
@@ -29,13 +28,12 @@ public class RefundMapper extends BaseMapper<RefundDTO, Refund>{
 
         return RefundDTO.builder()
                 .id(entity.getId())
-                .orderReferenceId(entity.getOrder().getOrderId())
-                .status(entity.getStatus().name())
+                .orderId(entity.getOrder() != null ? entity.getOrder().getOrderId() : null)
+                .status(entity.getStatus())
                 .amount(entity.getAmount())
                 .refundRequestTime(entity.getRefundRequestTime())
                 .refundCompletionTime(entity.getRefundCompletionTime())
-                .verifiedByEmployeeId(entity.getVerifiedByEmployee() != null ?
-                        entity.getVerifiedByEmployee().getStaffId() : null)
+                .verifiedByEmployeeId(entity.getVerifiedByEmployee() != null ? entity.getVerifiedByEmployee().getStaffId() : null)
                 .proofDocumentUrl(entity.getProofDocumentUrl())
                 .build();
     }
@@ -45,13 +43,31 @@ public class RefundMapper extends BaseMapper<RefundDTO, Refund>{
         if (dto == null) {
             return null;
         }
-        Order order = orderRepository.findById(dto.getOrderReferenceId()).orElseThrow(()-> new ResourceNotFoundException("Order Not Found"));
-        Staff staff = staffRepository.findById(dto.getVerifiedByEmployeeId()).orElseThrow(()-> new ResourceNotFoundException("Staff Not Found"));
+
         Refund refund = new Refund();
-        refund.setOrder(order);
+
+
+        if (dto.getOrderId() != null) {
+            refund.setOrder(orderRepository.findById(dto.getOrderId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Order Not Found")));
+        }
+
+
+        if (dto.getVerifiedByEmployeeId() != null) {
+            Staff staff = staffRepository.findById(dto.getVerifiedByEmployeeId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Staff Not Found"));
+            refund.setVerifiedByEmployee(staff);
+        }
+
         refund.setAmount(dto.getAmount());
-        refund.setStatus(Refund.RefundStatus.valueOf(dto.getStatus()));
-        refund.setVerifiedByEmployee(staff);
+
+
+        if (dto.getStatus() != null) {
+            refund.setStatus(dto.getStatus());
+        } else {
+            throw new IllegalArgumentException("Refund status cannot be null");
+        }
+
         refund.setRefundRequestTime(dto.getRefundRequestTime());
         refund.setRefundCompletionTime(dto.getRefundCompletionTime());
         refund.setProofDocumentUrl(dto.getProofDocumentUrl());

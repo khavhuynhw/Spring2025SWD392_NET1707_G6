@@ -1,5 +1,6 @@
 package com.net1707.backend.dto;
 
+import com.net1707.backend.model.Refund;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,8 +15,8 @@ import java.time.LocalDateTime;
 @Builder
 public class RefundDTO {
     private Long id;
-    private Long orderReferenceId;
-    private String status;
+    private Long orderId;
+    private Refund.RefundStatus status;
     private BigDecimal amount;
     private LocalDateTime refundRequestTime;
     private LocalDateTime refundCompletionTime;
