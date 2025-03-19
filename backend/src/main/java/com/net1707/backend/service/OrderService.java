@@ -2,8 +2,11 @@ package com.net1707.backend.service;
 
 import com.net1707.backend.dto.*;
 import com.net1707.backend.dto.request.OrderDeliveryRequestDTO;
+import com.net1707.backend.dto.request.OrderDetailRequestDTO;
+import com.net1707.backend.dto.request.OrderRequestDTO;
 import com.net1707.backend.mapper.OrderDetailMapper;
 import com.net1707.backend.mapper.OrderMapper;
+import com.net1707.backend.mapper.RefundMapper;
 import com.net1707.backend.model.*;
 import com.net1707.backend.repository.*;
 import com.net1707.backend.service.Interface.IOrderService;
@@ -31,6 +34,8 @@ public class OrderService implements IOrderService {
     private final OrderDetailMapper orderDetailMapper;
     private final IVNPayService vnPayService;
     private final PaymentRepository paymentRepository;
+    private final RefundRepository refundRepository;
+    private final RefundMapper refundMapper;
 
 
     @Override
@@ -38,28 +43,41 @@ public class OrderService implements IOrderService {
         return orderRepository.findAll().stream()
                 .map(order -> {
                     OrderDTO dto = orderMapper.toDto(order);
-                    List<OrderDetailDTO> orderDetails = order.getOrderDetails().stream()
+
+
+                    dto.setOrderDetails(order.getOrderDetails().stream()
                             .map(orderDetailMapper::toDto)
-                            .collect(Collectors.toList());
-                    dto.setOrderDetails(orderDetails);
+                            .collect(Collectors.toList()));
+
+
+                    refundRepository.findByOrder_OrderId(order.getOrderId())
+                            .ifPresent(refund -> dto.setRefund(refundMapper.toDto(refund)));
+
                     return dto;
                 })
                 .collect(Collectors.toList());
     }
+
     @Override
     public OrderDTO getOrderById(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
         OrderDTO dto = orderMapper.toDto(order);
+
         dto.setOrderDetails(order.getOrderDetails().stream()
                 .map(orderDetailMapper::toDto)
                 .collect(Collectors.toList()));
+
+        refundRepository.findByOrder_OrderId(orderId)
+                .ifPresent(refund -> dto.setRefund(refundMapper.toDto(refund)));
+
         return dto;
     }
 
+
     @Override
     @Transactional
-    public String createOrder(OrderRequestDTO orderRequestDTO, HttpServletRequest request,Long customerId) {
+    public String createOrder(OrderRequestDTO orderRequestDTO, HttpServletRequest request, Long customerId) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
@@ -232,14 +250,20 @@ public class OrderService implements IOrderService {
         return orderRepository.findByCustomer_CustomerId(customerId).stream()
                 .map(order -> {
                     OrderDTO dto = orderMapper.toDto(order);
-                    List<OrderDetailDTO> orderDetails = order.getOrderDetails().stream()
+
+
+                    dto.setOrderDetails(order.getOrderDetails().stream()
                             .map(orderDetailMapper::toDto)
-                            .collect(Collectors.toList());
-                    dto.setOrderDetails(orderDetails);
+                            .collect(Collectors.toList()));
+
+                    refundRepository.findByOrder_OrderId(order.getOrderId())
+                            .ifPresent(refund -> dto.setRefund(refundMapper.toDto(refund)));
+
                     return dto;
                 })
                 .collect(Collectors.toList());
     }
+
 
     @Override
     @Transactional
