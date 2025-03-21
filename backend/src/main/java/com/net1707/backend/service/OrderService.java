@@ -1,6 +1,7 @@
 package com.net1707.backend.service;
 
 import com.net1707.backend.dto.*;
+import com.net1707.backend.dto.exception.ResourceNotFoundException;
 import com.net1707.backend.dto.request.OrderDeliveryRequestDTO;
 import com.net1707.backend.dto.request.OrderDetailRequestDTO;
 import com.net1707.backend.dto.request.OrderRequestDTO;
@@ -79,12 +80,12 @@ public class OrderService implements IOrderService {
     @Transactional
     public String createOrder(OrderRequestDTO orderRequestDTO, HttpServletRequest request, Long customerId) {
         Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found with ID: " + customerId));
 
         Promotion promotion = null;
         if (orderRequestDTO.getPromotionId() != null) {
             promotion = promotionRepository.findById(orderRequestDTO.getPromotionId())
-                    .orElseThrow(() -> new RuntimeException("Promotion not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Promotion not found with ID: " + orderRequestDTO.getPromotionId()));
 
             if (orderRepository.hasUsedPromotion(customer.getCustomerId(), promotion.getPromotionId())) {
                 throw new RuntimeException("You have already used this promotion.");
@@ -102,13 +103,14 @@ public class OrderService implements IOrderService {
         List<OrderDetail> orderDetails = new ArrayList<>();
         BigDecimal totalAmount = BigDecimal.ZERO;
         List<ProductBatch> updatedBatches = new ArrayList<>();
+        Set<Product> productsToUpdate = new HashSet<>();
 
         for (OrderDetailRequestDTO detailRequest : orderRequestDTO.getOrderDetails()) {
             Product product = productRepository.findById(detailRequest.getProductId())
-                    .orElseThrow(() -> new RuntimeException("Product not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + detailRequest.getProductId()));
 
             if (detailRequest.getQuantity() > product.getStockQuantity()) {
-                throw new RuntimeException("Not enough stock for product ID: " + product.getProductID());
+                throw new ResourceNotFoundException("Not enough stock for product ID: " + product.getProductID());
             }
 
             // Choose batch has expiredDate
@@ -124,10 +126,13 @@ public class OrderService implements IOrderService {
             }
 
             if (selectedBatch == null) {
-                throw new RuntimeException("No available batch for product ID: " + product.getProductID());
+                throw new ResourceNotFoundException("No available batch for product ID: " + product.getProductID());
             }
             selectedBatch.setQuantity(selectedBatch.getQuantity() - detailRequest.getQuantity());
             updatedBatches.add(selectedBatch);
+
+            //add product to list update quantity
+            productsToUpdate.add(product);
 
             BigDecimal unitPrice = product.getPrice().multiply(BigDecimal.valueOf(detailRequest.getQuantity()));
 
@@ -142,6 +147,16 @@ public class OrderService implements IOrderService {
             totalAmount = totalAmount.add(unitPrice);
         }
         productBatchRepository.saveAll(updatedBatches);
+
+        //update stock quantity for product
+        for (Product product : productsToUpdate) {
+            int totalStock = productBatchRepository.findByProduct(product)
+                    .stream()
+                    .mapToInt(ProductBatch::getQuantity)
+                    .sum();
+            product.setStockQuantity(totalStock);
+        }
+        productRepository.saveAll(productsToUpdate);
 
 
         if (promotion != null && promotion.getDiscountPercentage() != null) {
@@ -208,16 +223,6 @@ public class OrderService implements IOrderService {
         if (isPaymentSuccessful) {
             order.setStatus(Order.OrderStatus.PAID);
 
-            for (OrderDetail detail : order.getOrderDetails()) {
-                Product product = detail.getProduct();
-                product.setStockQuantity(product.getStockQuantity() - detail.getQuantity());
-                productRepository.save(product);
-
-                //  delete batch
-                ProductBatch batch = detail.getProductBatch();
-                batch.setQuantity(batch.getQuantity() - detail.getQuantity());
-                productBatchRepository.save(batch);
-            }
             order.setPaymentUrl(null);
             orderRepository.save(order);
 

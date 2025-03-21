@@ -2,28 +2,31 @@ package com.net1707.backend.service;
 
 import com.net1707.backend.model.Order;
 import com.net1707.backend.model.OrderDetail;
+import com.net1707.backend.model.Product;
 import com.net1707.backend.model.ProductBatch;
 import com.net1707.backend.repository.OrderRepository;
 import com.net1707.backend.repository.ProductBatchRepository;
+import com.net1707.backend.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class OrderCleanupService {
     private final OrderRepository orderRepository;
     private final ProductBatchRepository productBatchRepository;
-    public OrderCleanupService(OrderRepository orderRepository,ProductBatchRepository productBatchRepository) {
+    private final ProductRepository productRepository;
+    public OrderCleanupService(OrderRepository orderRepository,ProductBatchRepository productBatchRepository,ProductRepository productRepository) {
         this.orderRepository = orderRepository;
         this.productBatchRepository = productBatchRepository;
+        this.productRepository = productRepository;
     }
 
 
-    @Scheduled(fixedRate = 60 * 1000) // run everyminute
+    @Scheduled(fixedRate = 60 * 1000) // run every minute
     @Transactional
     public void cleanUpExpiredOrders() {
         LocalDateTime tenMinutesAgo = LocalDateTime.now().minusMinutes(10);
@@ -31,13 +34,19 @@ public class OrderCleanupService {
 
         if (!expiredOrders.isEmpty()) {
             List<ProductBatch> updatedBatches = new ArrayList<>();
+            Set<Product> productsToUpdate = new HashSet<>();
 
             for (Order order : expiredOrders) {
                 for (OrderDetail orderDetail : order.getOrderDetails()) {
                     ProductBatch productBatch = orderDetail.getProductBatch();
+                    Product product = orderDetail.getProduct();
                     if (productBatch != null) {
+                        // add quantity to batch
                         productBatch.setQuantity(productBatch.getQuantity() + orderDetail.getQuantity());
-                        updatedBatches.add(productBatch); // add to list to delete all
+                        updatedBatches.add(productBatch);
+
+                        // add product to list update
+                        productsToUpdate.add(product);
                     }
                 }
                 System.out.println("🛑 Đang xóa Order ID: " + order.getOrderId());
@@ -46,12 +55,25 @@ public class OrderCleanupService {
 
             productBatchRepository.saveAll(updatedBatches);
 
-            // delete all order
+            // update stock quantity in product
+            for (Product product : productsToUpdate) {
+                int totalStock = productBatchRepository.findByProduct(product)
+                        .stream()
+                        .mapToInt(ProductBatch::getQuantity)
+                        .sum();
+                product.setStockQuantity(totalStock);
+            }
+
+            productRepository.saveAll(productsToUpdate);
+
+            // Xóa các đơn hàng hết hạn
             orderRepository.deleteAll(expiredOrders);
 
             System.out.println("✅ Đã xóa " + expiredOrders.size() + " đơn hàng quá hạn.");
         }
     }
+
+
 
 
     @Scheduled(cron = "0 0 0 * * ?") // Run at 0h everyday
