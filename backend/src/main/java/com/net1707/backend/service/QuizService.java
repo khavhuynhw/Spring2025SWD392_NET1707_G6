@@ -31,11 +31,13 @@ public class QuizService implements IQuizService {
     public QuizResult processQuizResponses(Customer customer, Map<String, String> responses) {
         SkinType skinType = determineSkinType(responses);
         Set<SkinConcern> skinConcerns = determineSkinConcerns(responses);
-
+        if (skinType == null) {
+            skinType = SkinType.NORMAL;
+        }
         QuizResult quizResult = QuizResult.builder()
                 .customer(customer)
                 .responses(responses)
-                .recommendedSkinType(skinType != null ? skinType : SkinType.NORMAL)
+                .recommendedSkinType(skinType)
                 .recommendedConcerns(skinConcerns)
                 .build();
 

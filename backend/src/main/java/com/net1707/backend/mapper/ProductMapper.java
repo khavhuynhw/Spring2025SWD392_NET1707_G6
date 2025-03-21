@@ -42,6 +42,7 @@ public class ProductMapper extends BaseMapper<ProductDTO, Product> {
                 .suitableClimateZones(dto.getSuitableClimateZones())
                 .stockQuantity(dto.getStockQuantity())
                 .imageURL(dto.getImageURL())
+                .skinTypeCompatibility(dto.getSkinTypeCompatibility())
                 .build();
     }
 

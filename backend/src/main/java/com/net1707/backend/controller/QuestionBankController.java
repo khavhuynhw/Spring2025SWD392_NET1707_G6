@@ -45,4 +45,9 @@ public class QuestionBankController {
         questionService.deleteQuestion(id);
         return "Question deleted successfully";
     }
+    @PutMapping("/{id}")
+    public ResponseEntity<QuestionBankDTO> updateQuestion(@PathVariable Long id,@RequestBody QuestionBankDTO questionBankDTO){
+        QuestionBank questionBank = questionService.updateQuestion(id, questionBankDTO);
+        return new ResponseEntity<>(questionBankMapper.toDto(questionBank),HttpStatus.CREATED);
+    }
 }
