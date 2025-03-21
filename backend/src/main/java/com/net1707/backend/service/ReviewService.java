@@ -10,7 +10,6 @@ import com.net1707.backend.model.OrderDetail;
 import com.net1707.backend.model.Review;
 import com.net1707.backend.repository.CustomerRepository;
 import com.net1707.backend.repository.OrderDetailRepository;
-import com.net1707.backend.repository.OrderRepository;
 import com.net1707.backend.repository.ReviewRepository;
 import com.net1707.backend.service.Interface.IReviewService;
 import jakarta.transaction.Transactional;
@@ -28,7 +27,7 @@ public class ReviewService implements IReviewService {
     private final CustomerRepository customerRepository;
     private final ReviewMapper reviewMapper;
 
-    // **Tạo Review**
+    // **Create Review**
     @Transactional
     @Override
     public ReviewDTO createReview(ReviewRequestDTO request,Long userId) {
@@ -61,7 +60,7 @@ public class ReviewService implements IReviewService {
         return reviewMapper.toDto(review);
     }
 
-    // **Cập nhật Review**
+    // **Update Review**
     @Transactional
     @Override
     public ReviewDTO updateReview(Long reviewId, ReviewRequestDTO request, Long userId) {
@@ -83,7 +82,7 @@ public class ReviewService implements IReviewService {
     }
 
 
-    // **Xóa Review**
+    // **Delete Review**
     @Transactional
     @Override
     public void deleteReview(Long reviewId, Long userId) {
@@ -96,7 +95,7 @@ public class ReviewService implements IReviewService {
         if (!review.getCustomer().getCustomerId().equals(customer.getCustomerId())) {
             throw new RuntimeException("You can only delete your own review.");
         }
-        // Xóa tham chiếu từ OrderDetail trước khi xóa review
+        // delete order detail in review before delete review
         OrderDetail orderDetail = review.getOrderDetail();
         if (orderDetail != null) {
             orderDetail.setReview(null);
@@ -116,7 +115,7 @@ public class ReviewService implements IReviewService {
     }
 
 
-    // **Lấy danh sách Review của một Product**
+    // **get list review for 1 product**
     @Override
     public List<ReviewDTO> getReviewsByProduct(Long productId) {
         List<Review> reviews = reviewRepository.findByOrderDetail_Product_productID(productId);
