@@ -52,6 +52,7 @@ public class QuestionBankService implements IQuestionBankService {
         questionBank.setQuestion(questionBankDTO.getQuestion());
         questionBank.setType(QuestionBank.QuestionType.valueOf(questionBankDTO.getType()));
         questionBankDTO.setOptions(questionBankDTO.getOptions());
+        questionBank.setLabel(questionBankDTO.getLabel());
         return  questionBankRepository.save(questionBank);
     }
 }
