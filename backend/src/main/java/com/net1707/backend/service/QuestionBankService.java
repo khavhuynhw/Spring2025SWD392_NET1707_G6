@@ -45,4 +45,14 @@ public class QuestionBankService implements IQuestionBankService {
         }
         questionBankRepository.deleteById(id);
     }
+
+    @Override
+    public QuestionBank updateQuestion(Long id, QuestionBankDTO questionBankDTO) {
+        QuestionBank questionBank = questionBankRepository.findById(id).orElseThrow(() -> new RuntimeException("Cannot found question with id "+ id));
+        questionBank.setQuestion(questionBankDTO.getQuestion());
+        questionBank.setType(QuestionBank.QuestionType.valueOf(questionBankDTO.getType()));
+        questionBankDTO.setOptions(questionBankDTO.getOptions());
+        questionBank.setLabel(questionBankDTO.getLabel());
+        return  questionBankRepository.save(questionBank);
+    }
 }

@@ -26,6 +26,8 @@ public class QuestionBankDTO {
     @Size(max = 50, message = "Type must be less than 50 characters")
     private String type;
 
+    private String label;
+
     @ElementCollection
     private List<String> options;
 }

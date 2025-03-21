@@ -13,6 +13,7 @@ public class QuestionBankMapper extends BaseMapper<QuestionBankDTO,QuestionBank>
                 .question(questionBank.getQuestion())
                 .type(String.valueOf(questionBank.getType()))
                 .options(questionBank.getOptions())
+                .label(questionBank.getLabel())
                 .build();
     }
     @Override
@@ -22,6 +23,7 @@ public class QuestionBankMapper extends BaseMapper<QuestionBankDTO,QuestionBank>
                 .question(dto.getQuestion())
                 .type(QuestionBank.QuestionType.valueOf(dto.getType()))
                 .options(dto.getOptions())
+                .label(dto.getLabel())
                 .build();
     }
 }

@@ -10,4 +10,6 @@ public interface IQuestionBankService {
     QuestionBank getQuestionById(Long id);
     QuestionBank addQuestion(QuestionBankDTO question);
     void deleteQuestion(Long id);
+
+    QuestionBank updateQuestion(Long id,QuestionBankDTO questionBankDTO);
 }

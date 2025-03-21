@@ -25,6 +25,8 @@ public class QuestionBank {
     @ElementCollection
     private List<String> options;
 
+    private String label;
+
     public enum QuestionType {
         SINGLE_CHOICE,
         MULTI_CHOICE,
