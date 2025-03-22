@@ -86,10 +86,6 @@ public class OrderService implements IOrderService {
         if (orderRequestDTO.getPromotionId() != null) {
             promotion = promotionRepository.findById(orderRequestDTO.getPromotionId())
                     .orElseThrow(() -> new ResourceNotFoundException("Promotion not found with ID: " + orderRequestDTO.getPromotionId()));
-
-            if (orderRepository.hasUsedPromotion(customer.getCustomerId(), promotion.getPromotionId())) {
-                throw new RuntimeException("You have already used this promotion.");
-            }
         }
 
         Order order = new Order();
@@ -117,34 +113,40 @@ public class OrderService implements IOrderService {
             List<ProductBatch> batches = productBatchRepository.findByProduct(product);
             batches.sort(Comparator.comparing(ProductBatch::getExpireDate));
 
-            ProductBatch selectedBatch = null;
+            int remainingQuantity = detailRequest.getQuantity();
+            BigDecimal totalUnitPrice = BigDecimal.ZERO;
+
             for (ProductBatch batch : batches) {
-                if (batch.getQuantity() >= detailRequest.getQuantity()) {
-                    selectedBatch = batch;
-                    break;
+                if (remainingQuantity == 0) break;
+                if (batch.getQuantity() > 0) {
+                    int takenQuantity = Math.min(batch.getQuantity(), remainingQuantity);
+                    batch.setQuantity(batch.getQuantity() - takenQuantity);
+                    remainingQuantity -= takenQuantity;
+
+                    // Cập nhật danh sách batch đã trừ số lượng
+                    updatedBatches.add(batch);
+
+                    // Thêm OrderDetail tương ứng với batch này
+                    OrderDetail orderDetail = new OrderDetail();
+                    orderDetail.setOrder(order);
+                    orderDetail.setProduct(product);
+                    orderDetail.setProductBatch(batch);  // ✅ Batch được chọn
+                    orderDetail.setQuantity(takenQuantity);
+                    BigDecimal unitPrice = product.getPrice().multiply(BigDecimal.valueOf(takenQuantity));
+                    orderDetail.setUnitPrice(unitPrice);
+                    orderDetails.add(orderDetail);
+
+                    totalUnitPrice = totalUnitPrice.add(unitPrice);
                 }
             }
 
-            if (selectedBatch == null) {
-                throw new ResourceNotFoundException("No available batch for product ID: " + product.getProductID());
-            }
-            selectedBatch.setQuantity(selectedBatch.getQuantity() - detailRequest.getQuantity());
-            updatedBatches.add(selectedBatch);
-
+            // Nếu vẫn còn số lượng cần trừ nhưng không tìm đủ batch
+            if (remainingQuantity > 0) {
+                throw new ResourceNotFoundException("Not enough stock for product ID: " + product.getProductID());
+            };
+            totalAmount = totalAmount.add(totalUnitPrice);
             //add product to list update quantity
             productsToUpdate.add(product);
-
-            BigDecimal unitPrice = product.getPrice().multiply(BigDecimal.valueOf(detailRequest.getQuantity()));
-
-            OrderDetail orderDetail = new OrderDetail();
-            orderDetail.setOrder(order);
-            orderDetail.setProduct(product);
-            orderDetail.setProductBatch(selectedBatch); // ✅ Gán batchId vào orderDetail
-            orderDetail.setQuantity(detailRequest.getQuantity());
-            orderDetail.setUnitPrice(unitPrice);
-            orderDetails.add(orderDetail);
-
-            totalAmount = totalAmount.add(unitPrice);
         }
         productBatchRepository.saveAll(updatedBatches);
 
