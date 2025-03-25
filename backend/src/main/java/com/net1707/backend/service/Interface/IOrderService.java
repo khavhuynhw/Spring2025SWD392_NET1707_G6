@@ -22,4 +22,6 @@ public interface IOrderService {
     List<OrderDTO> getOrdersByCustomer(Long customerId);
     Map<String, String> updateOrderStatus(Long orderId, Order.OrderStatus newStatus);
     OrderDTO updateDeliveryStatus(OrderDeliveryRequestDTO requestDTO);
+    boolean assignDeliveryStaff(Long orderId, Long staffId);
+    List<OrderDTO> getOrdersByStaff(Long staffId);
 }

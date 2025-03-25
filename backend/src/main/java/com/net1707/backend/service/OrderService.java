@@ -289,6 +289,39 @@ public class OrderService implements IOrderService {
         return response;
     }
 
+    @Override
+    public boolean assignDeliveryStaff(Long orderId, Long staffId){
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with ID: " + orderId));
+        Staff staff = staffRepository.findById(staffId)
+                .orElseThrow(() -> new ResourceNotFoundException("Staff not found with ID: " + staffId));
+
+        order.setStaff(staff);
+        orderRepository.save(order);
+        return true;
+    }
+
+    @Override
+    public List<OrderDTO> getOrdersByStaff(Long staffId) {
+        Staff staff = staffRepository.findById(staffId)
+                .orElseThrow(() -> new ResourceNotFoundException("Staff not found with ID: " + staffId));
+
+        return orderRepository.findByStaff_staffId(staffId).stream()
+                .map(order -> {
+                    OrderDTO dto = orderMapper.toDto(order);
+
+
+                    dto.setOrderDetails(order.getOrderDetails().stream()
+                            .map(orderDetailMapper::toDto)
+                            .collect(Collectors.toList()));
+
+                    refundRepository.findByOrder_OrderId(order.getOrderId())
+                            .ifPresent(refund -> dto.setRefund(refundMapper.toDto(refund)));
+
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
 
     @Override
     public OrderDTO updateDeliveryStatus(OrderDeliveryRequestDTO requestDTO) {
