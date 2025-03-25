@@ -96,4 +96,23 @@ public class OrderController {
         Map<String, String> response = orderService.updateOrderStatus(orderId, status);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/assign-delivery-staff")
+    public ResponseEntity<String> assignDeliveryStaff(
+            @RequestParam Long orderId,
+            @RequestParam Long staffId) {
+
+        boolean success = orderService.assignDeliveryStaff(orderId, staffId);
+        if (success) {
+            return ResponseEntity.ok("Delivery staff assigned successfully.");
+        } else {
+            return ResponseEntity.badRequest().body("Order or Staff not found.");
+        }
+    }
+
+
+    @GetMapping("/by-staff/{staffId}")
+    public ResponseEntity<List<OrderDTO>> getOrdersByStaff(@PathVariable Long staffId) {
+        return ResponseEntity.ok(orderService.getOrdersByStaff(staffId));
+    }
 }
