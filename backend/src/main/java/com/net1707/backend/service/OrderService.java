@@ -11,10 +11,13 @@ import com.net1707.backend.mapper.RefundMapper;
 import com.net1707.backend.model.*;
 import com.net1707.backend.repository.*;
 import com.net1707.backend.service.Interface.IOrderService;
+import com.net1707.backend.service.Interface.IRefundService;
 import com.net1707.backend.service.Interface.IVNPayService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -24,6 +27,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class OrderService implements IOrderService {
+    private static final Logger logger = LoggerFactory.getLogger(OrderService.class);
     private final OrderRepository orderRepository;
     private final OrderDetailRepository orderDetailRepository;
     private final PromotionRepository promotionRepository;
@@ -37,7 +41,7 @@ public class OrderService implements IOrderService {
     private final PaymentRepository paymentRepository;
     private final RefundRepository refundRepository;
     private final RefundMapper refundMapper;
-
+    private final IRefundService refundService;
 
     @Override
     public List<OrderDTO> getAllOrders() {
@@ -62,7 +66,7 @@ public class OrderService implements IOrderService {
     @Override
     public OrderDTO getOrderById(Long orderId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with ID: " + orderId));
         OrderDTO dto = orderMapper.toDto(order);
 
         dto.setOrderDetails(order.getOrderDetails().stream()
@@ -181,7 +185,7 @@ public class OrderService implements IOrderService {
     @Transactional
     public OrderDTO updateOrder(Long orderId, OrderDTO orderDTO) {
         Order existingOrder = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with ID: " + orderId));
         existingOrder.setOrderDate(orderDTO.getOrderDate());
         existingOrder.setTotalAmount(orderDTO.getTotalAmount());
         existingOrder.setStatus(orderDTO.getStatus());
@@ -190,7 +194,9 @@ public class OrderService implements IOrderService {
     @Override
     @Transactional
     public void deleteOrder(Long orderId) {
-        orderRepository.deleteById(orderId);
+        Order existingOrder = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with ID: " + orderId));
+        orderRepository.deleteById(existingOrder.getOrderId());
     }
 
 
@@ -218,7 +224,7 @@ public class OrderService implements IOrderService {
         }
 
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with ID: " + orderId));
 
         boolean isPaymentSuccessful = "success".equals(params.get("status"));
 
@@ -252,7 +258,7 @@ public class OrderService implements IOrderService {
     @Override
     public List<OrderDTO> getOrdersByCustomer(Long customerId) {
         Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found with ID: " + customerId));
 
         return orderRepository.findByCustomer_CustomerId(customerId).stream()
                 .map(order -> {
@@ -278,19 +284,47 @@ public class OrderService implements IOrderService {
         Map<String, String> response = new HashMap<>();
 
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with ID: " + orderId));
 
-        // Update new order status
-        order.setStatus(newStatus);
+        // Nếu đơn hàng đang ở trạng thái SHIPPED
+        if (order.getStatus() == Order.OrderStatus.SHIPPED || order.getStatus() == Order.OrderStatus.DELIVERY_FAILED) {
+            if (newStatus == Order.OrderStatus.DELIVERED) {
+                order.setStatus(Order.OrderStatus.DELIVERED);
+                response.put("message", "Order delivered successfully!");
+            } else if (newStatus == Order.OrderStatus.DELIVERY_FAILED) {
+                order.setDeliveryAttempts(order.getDeliveryAttempts() + 1);
+                order.setStatus(Order.OrderStatus.DELIVERY_FAILED);
+
+                if (order.getDeliveryAttempts() >= 3) {
+                    response.put("message", "Order delivery failed 3 times. Order has been refunded.");
+                    orderRepository.save(order);
+
+                    RefundDTO refundDTO = refundService.requestRefund(order.getOrderId());
+                    refundService.autoVerifyRefund(refundDTO.getId());
+                    if (order.getStaff() != null) {
+                        refundService.assignDeliveryStaff(refundDTO.getId(), order.getStaff().getStaffId());
+                    } else {
+                        response.put("warning", "No delivery staff assigned to order.");
+                    }
+                } else {
+                    response.put("message", "Delivery failed. Attempt " + order.getDeliveryAttempts() + "/3.");
+                    return response; // Không cập nhật trạng thái nếu chưa đạt 3 lần
+                }
+            }
+        } else {
+            // Cập nhật trạng thái bình thường nếu không phải SHIPPED
+            order.setStatus(newStatus);
+            response.put("message", "Order status updated successfully!");
+        }
+
         orderRepository.save(order);
-
         response.put("status", "success");
-        response.put("message", "Order status updated successfully!");
         return response;
     }
 
+
     @Override
-    public boolean assignDeliveryStaff(Long orderId, Long staffId){
+    public void assignDeliveryStaff(Long orderId, Long staffId){
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found with ID: " + orderId));
         Staff staff = staffRepository.findById(staffId)
@@ -298,7 +332,6 @@ public class OrderService implements IOrderService {
 
         order.setStaff(staff);
         orderRepository.save(order);
-        return true;
     }
 
     @Override
@@ -326,9 +359,9 @@ public class OrderService implements IOrderService {
     @Override
     public OrderDTO updateDeliveryStatus(OrderDeliveryRequestDTO requestDTO) {
         Order order = orderRepository.findById(requestDTO.getOrderId())
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with ID: " + requestDTO.getOrderId()));
         Staff staff = staffRepository.findById(requestDTO.getDeliveryStaffId())
-                .orElseThrow(() -> new RuntimeException("Staff not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Staff not found with ID: " + requestDTO.getDeliveryStaffId()));
         if (order.getStatus() == Order.OrderStatus.PAID) {
             throw new IllegalStateException("Order is not in deliverable state");
         }

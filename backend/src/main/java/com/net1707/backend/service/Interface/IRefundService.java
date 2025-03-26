@@ -16,4 +16,7 @@ public interface IRefundService {
     void deleteRefund(Long refundId);
     RefundDTO getRefundById(Long refundId);
     List<RefundDTO> getAllRefunds();
+    void assignDeliveryStaff(Long refundId, Long staffId);
+    List<RefundDTO> getRefundsByStaff(Long staffId);
+    RefundDTO autoVerifyRefund(Long refundId);
 }

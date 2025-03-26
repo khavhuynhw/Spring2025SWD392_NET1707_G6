@@ -102,12 +102,8 @@ public class OrderController {
             @RequestParam Long orderId,
             @RequestParam Long staffId) {
 
-        boolean success = orderService.assignDeliveryStaff(orderId, staffId);
-        if (success) {
-            return ResponseEntity.ok("Delivery staff assigned successfully.");
-        } else {
-            return ResponseEntity.badRequest().body("Order or Staff not found.");
-        }
+        orderService.assignDeliveryStaff(orderId, staffId);
+        return ResponseEntity.ok("Delivery staff assigned successfully.");
     }
 
 

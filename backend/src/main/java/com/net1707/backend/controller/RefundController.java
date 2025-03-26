@@ -63,4 +63,20 @@ public class RefundController {
         refundService.deleteRefund(refundId);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/assign-delivery-staff")
+    public ResponseEntity<String> assignDeliveryStaff(
+            @RequestParam Long refundId,
+            @RequestParam Long staffId) {
+
+        refundService.assignDeliveryStaff(refundId, staffId);
+        return ResponseEntity.ok("Delivery staff assigned successfully.");
+    }
+
+
+
+    @GetMapping("/by-staff/{staffId}")
+    public ResponseEntity<List<RefundDTO>> getRefundsByStaff(@PathVariable Long staffId) {
+        return ResponseEntity.ok(refundService.getRefundsByStaff(staffId));
+    }
 }
