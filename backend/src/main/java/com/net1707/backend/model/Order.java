@@ -24,6 +24,8 @@ public class Order {
     private LocalDate orderDate;
     private BigDecimal totalAmount;
 
+    private int deliveryAttempts = 0;
+
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
     public enum OrderStatus{
@@ -34,7 +36,8 @@ public class Order {
         CANCELLED,
         RETURNED,
         REFUNDED,
-        COMPLETED
+        COMPLETED,
+        DELIVERY_FAILED
     }
 
 

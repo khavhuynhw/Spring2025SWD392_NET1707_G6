@@ -45,7 +45,7 @@ public class RefundService implements IRefundService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found with ID: " + orderId));
 
-        if (order.getStatus() != Order.OrderStatus.DELIVERED && order.getStatus() != Order.OrderStatus.PAID) {
+        if (order.getStatus() != Order.OrderStatus.DELIVERED && order.getStatus() != Order.OrderStatus.PAID && order.getStatus() != Order.OrderStatus.DELIVERY_FAILED) {
             throw new IllegalStateException("Order is not in PAID or DELIVERED state, cannot request refund.");
         }
 
@@ -91,6 +91,19 @@ public class RefundService implements IRefundService {
         return refundMapper.toDto(refundRepository.save(refund));
     }
 
+    @Transactional
+    @Override
+    public RefundDTO autoVerifyRefund(Long refundId) {
+        Refund refund = refundRepository.findById(refundId)
+                .orElseThrow(() -> new ResourceNotFoundException("Refund not found with ID: " + refundId));
+
+        if (refund.getStatus() != Refund.RefundStatus.REQUESTED) {
+            throw new IllegalStateException("Refund is not in REQUESTED state, cannot auto-verify.");
+        }
+
+        refund.setStatus(Refund.RefundStatus.VERIFIED);
+        return refundMapper.toDto(refundRepository.save(refund));
+    }
 
     @Transactional
     @Override
@@ -138,7 +151,7 @@ public class RefundService implements IRefundService {
                 .orElseThrow(() -> new ResourceNotFoundException("Staff not found with ID: " + staffId));
 
         // Nếu đơn hàng đã thanh toán nhưng chưa giao → Hủy ngay, nhưng vẫn phải hoàn kho
-        if (order.getStatus() == Order.OrderStatus.PAID && refund.getStatus() == Refund.RefundStatus.VERIFIED) {
+        if (order.getStatus() == Order.OrderStatus.PAID && refund.getStatus() == Refund.RefundStatus.VERIFIED || order.getStatus() == Order.OrderStatus.DELIVERY_FAILED && refund.getStatus() == Refund.RefundStatus.VERIFIED) {
             order.setStatus(Order.OrderStatus.CANCELLED);
         }
         // Nếu đơn hàng đã giao → Phải trả hàng về kho trước khi hoàn tiền
@@ -211,6 +224,28 @@ public class RefundService implements IRefundService {
         }
 
         refundRepository.delete(refund);
+    }
+
+    @Override
+    public void assignDeliveryStaff(Long refundId, Long staffId) {
+        Refund refund = refundRepository.findById(refundId)
+                .orElseThrow(() -> new ResourceNotFoundException("Refund not found with ID: " + refundId));
+        Staff staff = staffRepository.findById(staffId)
+                .orElseThrow(() -> new ResourceNotFoundException("Staff not found with ID: " + staffId));
+
+        refund.setVerifiedByEmployee(staff);
+        refundRepository.save(refund);
+    }
+
+    @Override
+    public List<RefundDTO> getRefundsByStaff(Long staffId) {
+        // Kiểm tra xem staff có tồn tại không
+        Staff staff = staffRepository.findById(staffId)
+                .orElseThrow(() -> new ResourceNotFoundException("Staff not found with ID: " + staffId));
+
+        return refundRepository.findByVerifiedByEmployee_StaffId(staffId).stream()
+                .map(refundMapper::toDto)
+                .collect(Collectors.toList());
     }
 
 
