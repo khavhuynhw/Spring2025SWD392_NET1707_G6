@@ -47,6 +47,8 @@ public class Order {
     @Column(nullable = false, length = 500)
     private String address;
 
+    private String reason;
+
     @Lob  // save by TEXT in database
     @Column(nullable = true, columnDefinition = "TEXT")
     private String paymentUrl;

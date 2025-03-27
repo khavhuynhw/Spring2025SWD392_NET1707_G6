@@ -35,6 +35,8 @@ public class OrderMapper extends BaseMapper<OrderDTO, Order> {
                 .status(entity.getStatus())
                 .address(entity.getAddress())
                 .paymentUrl(entity.getPaymentUrl())
+                .deliveryAttempts(entity.getDeliveryAttempts())
+                .reason(entity.getReason())
                 .customerId(entity.getCustomer() != null ? entity.getCustomer().getCustomerId() : null)
                 .promotionId(entity.getPromotion() != null ? entity.getPromotion().getPromotionId() : null)
                 .staffId(entity.getStaff() != null ? entity.getStaff().getStaffId() : null)

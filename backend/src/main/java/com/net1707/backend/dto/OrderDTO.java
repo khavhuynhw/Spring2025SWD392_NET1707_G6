@@ -23,4 +23,6 @@ public class OrderDTO {
     private List<OrderDetailDTO> orderDetails;
     private String paymentUrl;
     private RefundDTO refund;
+    private String reason;
+    private int deliveryAttempts;
 }
