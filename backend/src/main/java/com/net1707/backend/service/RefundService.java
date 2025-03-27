@@ -45,8 +45,8 @@ public class RefundService implements IRefundService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found with ID: " + orderId));
 
-        if (order.getStatus() != Order.OrderStatus.DELIVERED && order.getStatus() != Order.OrderStatus.PAID && order.getStatus() != Order.OrderStatus.DELIVERY_FAILED) {
-            throw new IllegalStateException("Order is not in PAID or DELIVERED state, cannot request refund.");
+        if (order.getStatus() != Order.OrderStatus.DELIVERED && order.getStatus() != Order.OrderStatus.CANCELLED && order.getStatus() != Order.OrderStatus.DELIVERY_FAILED) {
+            throw new IllegalStateException("Order is not in CANCELLED or DELIVERED state, cannot request refund.");
         }
 
         if (refundRepository.findByOrder(order).isPresent()) {
