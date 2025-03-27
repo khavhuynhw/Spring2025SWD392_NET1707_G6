@@ -151,7 +151,7 @@ public class RefundService implements IRefundService {
                 .orElseThrow(() -> new ResourceNotFoundException("Staff not found with ID: " + staffId));
 
         // Nếu đơn hàng đã thanh toán nhưng chưa giao → Hủy ngay, nhưng vẫn phải hoàn kho
-        if (order.getStatus() == Order.OrderStatus.PAID && refund.getStatus() == Refund.RefundStatus.VERIFIED || order.getStatus() == Order.OrderStatus.DELIVERY_FAILED && refund.getStatus() == Refund.RefundStatus.VERIFIED) {
+        if (order.getStatus() == Order.OrderStatus.DELIVERY_FAILED && refund.getStatus() == Refund.RefundStatus.VERIFIED) {
             order.setStatus(Order.OrderStatus.CANCELLED);
         }
         // Nếu đơn hàng đã giao → Phải trả hàng về kho trước khi hoàn tiền
