@@ -189,6 +189,7 @@ public class OrderService implements IOrderService {
         existingOrder.setOrderDate(orderDTO.getOrderDate());
         existingOrder.setTotalAmount(orderDTO.getTotalAmount());
         existingOrder.setStatus(orderDTO.getStatus());
+        existingOrder.setReason(orderDTO.getReason());
         return orderMapper.toDto(orderRepository.save(existingOrder));
     }
     @Override
