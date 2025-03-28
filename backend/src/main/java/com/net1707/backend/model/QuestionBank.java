@@ -28,8 +28,12 @@ public class QuestionBank {
     private String label;
 
     public enum QuestionType {
-        SINGLE_CHOICE,
-        MULTI_CHOICE,
-        TEXT_INPUT
+        OILINESS,
+        DRYNESS,
+        SENSITIVITY,
+        ACNE,
+        AGING,
+        HYPERPIGMENTATION,
+        REDNESS,
     }
 }

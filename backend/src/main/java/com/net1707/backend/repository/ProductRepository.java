@@ -12,12 +12,10 @@ import java.util.List;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT p FROM Product p WHERE " +
-            ":skinType MEMBER OF p.suitableSkinTypes AND " +
-            "p.suitableForSensitiveSkin = true"
+            ":skinType MEMBER OF p.suitableSkinTypes"
     )
     List<Product> findProductsBySkinType(SkinType skinType);
     @Query("SELECT p FROM Product p WHERE " +
-            ":concern MEMBER OF p.targetsConcerns AND " +
-            "p.suitableForSensitiveSkin = true")
+            ":concern MEMBER OF p.targetsConcerns ")
     List<Product> findProductsBySkinConcern(SkinConcern concern);
 }

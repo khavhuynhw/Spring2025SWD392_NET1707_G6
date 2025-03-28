@@ -1,5 +1,6 @@
 package com.net1707.backend.controller;
 
+import com.net1707.backend.dto.response.QuizQuestionResponse;
 import com.net1707.backend.model.Customer;
 import com.net1707.backend.model.Product;
 import com.net1707.backend.model.QuestionBank;
@@ -24,19 +25,23 @@ public class QuizController {
     public ResponseEntity<List<QuestionBank>> getAllQuestions() {
         return ResponseEntity.ok(quizService.getAllQuizQuestions());
     }
+
     @PostMapping("/submit/{customerId}")
     public ResponseEntity<?> submitQuiz(
             @PathVariable Long customerId,
-            @RequestBody Map<String, String> responses
+            @RequestBody List<QuizQuestionResponse> responses
     ) {
-        // Fetch customer
+
         Customer customer = customerService.getCustomerById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
-        // Process quiz responses
-        QuizResult quizResult = quizService.processQuizResponses(customer, responses);
 
-        // Recommend products
+        Map<String, String> formattedResponses = quizService.processUserResponses(responses);
+
+
+        QuizResult quizResult = quizService.processQuizResponses(customer, formattedResponses);
+
+
         List<Product> recommendedProducts = quizService.recommendProducts(quizResult);
 
         return ResponseEntity.ok(Map.of(
@@ -44,5 +49,6 @@ public class QuizController {
                 "recommendedProducts", recommendedProducts
         ));
     }
+
 }
 

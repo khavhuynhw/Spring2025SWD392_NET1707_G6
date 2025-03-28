@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface QuestionBankRepository extends JpaRepository<QuestionBank,Long> {
-    List<QuestionBank> findByType(QuestionBank.QuestionType type);
+    List<QuestionBank> findByTypeIn(List<String> types);
 }

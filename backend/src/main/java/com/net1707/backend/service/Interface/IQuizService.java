@@ -1,5 +1,6 @@
 package com.net1707.backend.service.Interface;
 
+import com.net1707.backend.dto.response.QuizQuestionResponse;
 import com.net1707.backend.model.*;
 
 import java.util.List;
@@ -17,4 +18,5 @@ public interface IQuizService {
     );
     List<Product> recommendProducts(QuizResult quizResult);
     List<QuestionBank> getAllQuizQuestions();
+    Map<String, String> processUserResponses(List<QuizQuestionResponse> userResponses);
 }
