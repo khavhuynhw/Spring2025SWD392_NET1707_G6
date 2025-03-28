@@ -1,11 +1,13 @@
 package com.net1707.backend.service;
 
+import com.net1707.backend.dto.response.QuizQuestionResponse;
 import com.net1707.backend.model.*;
 import com.net1707.backend.repository.CustomerRepository;
 import com.net1707.backend.repository.ProductRepository;
 import com.net1707.backend.repository.QuestionBankRepository;
 import com.net1707.backend.repository.QuizResultRepository;
 import com.net1707.backend.service.Interface.IQuizService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -46,80 +48,118 @@ public class QuizService implements IQuizService {
 
     @Override
     public SkinType determineSkinType(Map<String, String> responses) {
-        if (responses.containsKey("oiliness") &&
-                (responses.get("oiliness").equals("very_oily") || responses.get("oiliness").equals("oily"))) {
+        int oilyScore = 0;
+        int dryScore = 0;
+        int sensitiveScore = 0;
 
-            if (responses.containsKey("dryness") &&
-                    (responses.get("dryness").equals("dry") || responses.get("dryness").equals("very_dry"))) {
-                return SkinType.COMBINATION;
-            } else {
-                return SkinType.OILY;
+        if (responses.containsKey(QuestionBank.QuestionType.OILINESS.toString())) {
+            String oilinessResponse = responses.get(QuestionBank.QuestionType.OILINESS.toString());
+            if ("very_oily".equals(oilinessResponse) || "oily".equals(oilinessResponse)) {
+                oilyScore += 2;
+            } else if ("slightly_oily".equals(oilinessResponse)) {
+                oilyScore += 1;
             }
         }
 
+        if (responses.containsKey(QuestionBank.QuestionType.DRYNESS.toString())) {
+            String drynessResponse = responses.get(QuestionBank.QuestionType.DRYNESS.toString());
+            if ("very_dry".equals(drynessResponse) || "dry".equals(drynessResponse)) {
+                dryScore += 2;
+            } else if ("slightly_dry".equals(drynessResponse)) {
+                dryScore += 1;
+            }
+        }
 
-        if (responses.containsKey("dryness") &&
-                (responses.get("dryness").equals("very_dry") || responses.get("dryness").equals("dry"))) {
+        if (responses.containsKey(QuestionBank.QuestionType.SENSITIVITY.toString())) {
+            String sensitivityResponse = responses.get(QuestionBank.QuestionType.SENSITIVITY.toString());
+            if ("high".equals(sensitivityResponse) || "medium".equals(sensitivityResponse)) {
+                sensitiveScore += 2;
+            } else if ("low".equals(sensitivityResponse)) {
+                sensitiveScore += 1;
+            }
+        }
+
+        if (oilyScore >= 2 && dryScore >= 2) {
+            return SkinType.COMBINATION;
+        } else if (oilyScore >= 2) {
+            return SkinType.OILY;
+        } else if (dryScore >= 2) {
             return SkinType.DRY;
-        }
-
-
-        if (responses.containsKey("sensitivity") &&
-                (responses.get("sensitivity").equals("high") || responses.get("sensitivity").equals("medium"))) {
+        } else if (sensitiveScore >= 2) {
             return SkinType.SENSITIVE;
+        } else {
+            return SkinType.NORMAL;
         }
-
-
-        return SkinType.NORMAL;
     }
 
     @Override
     public Set<SkinConcern> determineSkinConcerns(Map<String, String> responses) {
         Set<SkinConcern> concerns = new HashSet<>();
 
-        // Acne concern
-        if (responses.containsKey("acne") &&
-                responses.get("acne").equals("yes")) {
-            concerns.add(SkinConcern.ACNE);
+        if (responses.containsKey(QuestionBank.QuestionType.ACNE.toString())) {
+            String acneResponse = responses.get(QuestionBank.QuestionType.ACNE.toString());
+            if ("yes".equals(acneResponse) || "severe".equals(acneResponse)) {
+                concerns.add(SkinConcern.ACNE);
+            }
         }
 
-        // Aging concern
-        if (responses.containsKey("aging") &&
-                (responses.get("aging").equals("visible") || responses.get("aging").equals("concerned"))) {
-            concerns.add(SkinConcern.AGING);
+        if (responses.containsKey(QuestionBank.QuestionType.AGING.toString())) {
+            String agingResponse = responses.get(QuestionBank.QuestionType.AGING.toString());
+            if ("visible".equals(agingResponse) || "concerned".equals(agingResponse)) {
+                concerns.add(SkinConcern.AGING);
+            }
         }
 
-        // Hyperpigmentation concern
-        if (responses.containsKey("hyperpigmentation") &&
-                (responses.get("hyperpigmentation").equals("yes") || responses.get("hyperpigmentation").equals("noticeable"))) {
-            concerns.add(SkinConcern.HYPERPIGMENTATION);
+        if (responses.containsKey(QuestionBank.QuestionType.HYPERPIGMENTATION.toString())) {
+            String pigmentResponse = responses.get(QuestionBank.QuestionType.HYPERPIGMENTATION.toString());
+            if ("yes".equals(pigmentResponse) || "noticeable".equals(pigmentResponse)) {
+                concerns.add(SkinConcern.HYPERPIGMENTATION);
+            }
         }
 
-        // Redness concern
-        if (responses.containsKey("redness") &&
-                (responses.get("redness").equals("yes") || responses.get("redness").equals("frequent"))) {
-            concerns.add(SkinConcern.REDNESS);
+        if (responses.containsKey(QuestionBank.QuestionType.REDNESS.toString())) {
+            String rednessResponse = responses.get(QuestionBank.QuestionType.REDNESS.toString());
+            if ("yes".equals(rednessResponse) || "frequent".equals(rednessResponse)) {
+                concerns.add(SkinConcern.REDNESS);
+            }
         }
 
-        // Dryness concern
-        if (responses.containsKey("dryness") &&
-                (responses.get("dryness").equals("yes") || responses.get("dryness").equals("persistent"))) {
-            concerns.add(SkinConcern.DRYNESS);
+        if (responses.containsKey(QuestionBank.QuestionType.DRYNESS.toString())) {
+            String drynessResponse = responses.get(QuestionBank.QuestionType.DRYNESS.toString());
+            if ("very_dry".equals(drynessResponse) || "dry".equals(drynessResponse)) {
+                concerns.add(SkinConcern.DRYNESS);
+            }
         }
 
-        // Oiliness concern
-        if (responses.containsKey("oiliness") &&
-                (responses.get("oiliness").equals("yes") || responses.get("oiliness").equals("excessive"))) {
-            concerns.add(SkinConcern.OILINESS);
+        if (responses.containsKey(QuestionBank.QuestionType.OILINESS.toString())) {
+            String oilinessResponse = responses.get(QuestionBank.QuestionType.OILINESS.toString());
+            if ("very_oily".equals(oilinessResponse) || "oily".equals(oilinessResponse)) {
+                concerns.add(SkinConcern.OILINESS);
+            }
         }
 
-        // Sensitivity concern
-        if (responses.containsKey("sensitivity") &&
-                (responses.get("sensitivity").equals("yes") || responses.get("sensitivity").equals("high"))) {
-            concerns.add(SkinConcern.SENSITIVITY);
+        if (responses.containsKey(QuestionBank.QuestionType.SENSITIVITY.toString())) {
+            String sensitivityResponse = responses.get(QuestionBank.QuestionType.SENSITIVITY.toString());
+            if ("high".equals(sensitivityResponse)) {
+                concerns.add(SkinConcern.SENSITIVITY);
+            }
         }
 
         return concerns;
+    }
+
+    @Override
+    public Map<String, String> processUserResponses(List<QuizQuestionResponse> userResponses) {
+        Map<String, String> formattedResponses = new HashMap<>();
+
+        for (QuizQuestionResponse response : userResponses) {
+            QuestionBank question = questionBankRepository.findById(response.getQuestionId())
+                    .orElseThrow(() -> new EntityNotFoundException("Question not found"));
+
+            formattedResponses.put(question.getType().toString(), response.getResponse());
+        }
+
+        return formattedResponses;
     }
 
     @Override
